@@ -1,0 +1,2295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TA-ROD · Tarot · Astrología · Chamanismo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abyss:#07071A;--dp:#120A2E;--gold:#C9A84C;--gl:#E8D5A3;--gd:#7A6230;
+  --tp:#E8D5A3;--ts:#9A8A6A;--tm:#5A5070;
+  --br:rgba(201,168,76,0.15);--bb:rgba(201,168,76,0.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--abyss);color:var(--tp);font-family:'Inter',sans-serif;font-weight:300;overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+#cur{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);font-size:1.3rem;color:var(--gold);text-shadow:0 0 12px rgba(201,168,76,.7);transition:font-size .3s;user-select:none}
+#cur-ring{position:fixed;width:38px;height:38px;border:1px solid rgba(201,168,76,.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform .15s ease-out,width .3s,height .3s}
+
+/* BG CANVAS */
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.8}
+
+/* SKETCH LAYER */
+.sketch-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.sk{position:absolute;pointer-events:none;user-select:none;font-family:serif;color:rgba(201,168,76,.06);animation:skbr var(--dur,18s) ease-in-out infinite var(--del,0s)}
+@keyframes skbr{0%,100%{opacity:.4;transform:rotate(var(--r,0deg)) scale(1)}50%{opacity:1;transform:rotate(calc(var(--r,0deg) + 4deg)) scale(1.04)}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 4rem;background:linear-gradient(to bottom,rgba(7,7,26,.95),transparent);border-bottom:1px solid transparent;transition:border-color .3s,background .3s}
+nav.sc{border-bottom-color:var(--br);background:rgba(7,7,26,.97)}
+.logo{font-family:'Playfair Display',serif;font-size:1.5rem;letter-spacing:.15em;color:var(--gold);text-decoration:none}
+.logo em{font-style:italic;color:var(--gl)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ts);text-decoration:none;transition:color .3s}
+.nav-links a:hover{color:var(--gl)}
+.nav-cta{padding:.55rem 1.4rem;border:1px solid var(--bb);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);background:transparent;cursor:pointer;transition:all .3s;font-family:'Inter',sans-serif}
+.nav-cta:hover{background:rgba(201,168,76,.1)}
+.nav-tel{font-size:.6rem;letter-spacing:.15em;color:var(--gold);text-decoration:none;border:1px solid var(--br);padding:.42rem .9rem;transition:all .3s;white-space:nowrap}
+.nav-tel:hover{border-color:var(--bb);color:var(--gl)}
+
+/* HERO */
+#hero{position:relative;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;z-index:1}
+#zodiac-canvas{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;pointer-events:none;opacity:.5;z-index:0}
+.hero-eyebrow{font-size:.62rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gd);margin-bottom:1.5rem;position:relative;z-index:2}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(4.5rem,11vw,10rem);line-height:.92;letter-spacing:-.02em;color:var(--gl);margin-bottom:1rem;position:relative;z-index:2}
+.hero-title em{font-style:italic;color:var(--gold)}
+.hero-sub{font-family:'Cormorant Garamond',serif;font-size:clamp(1rem,2.2vw,1.35rem);font-style:italic;color:var(--ts);letter-spacing:.05em;margin-bottom:3rem;max-width:480px;position:relative;z-index:2}
+.hero-btns{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:2}
+.btn-p{padding:.9rem 2.2rem;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid var(--gold);color:var(--gl);font-family:'Inter',sans-serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .4s}
+.btn-p:hover{box-shadow:0 0 28px rgba(201,168,76,.25)}
+.btn-g{padding:.9rem 2.2rem;background:transparent;border:1px solid var(--br);color:var(--ts);font-family:'Inter',sans-serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.btn-g:hover{border-color:var(--bb);color:var(--tp)}
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;color:var(--tm);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;z-index:2}
+.scroll-line{width:1px;height:36px;background:linear-gradient(to bottom,transparent,var(--gd));animation:scdrop 2s ease-in-out infinite}
+@keyframes scdrop{0%,100%{opacity:.3;transform:scaleY(.5)}50%{opacity:1;transform:scaleY(1)}}
+
+/* SECTIONS */
+section{position:relative;z-index:1;padding:6rem 4rem}
+.divider{width:55px;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:0 auto 1.2rem}
+.eyebrow{text-align:center;font-size:.58rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gd);margin-bottom:.7rem}
+.sec-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.3rem);text-align:center;color:var(--gl);margin-bottom:.8rem;line-height:1.1}
+.sec-title em{font-style:italic;color:var(--gold)}
+.sec-sub{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-style:italic;color:var(--ts);text-align:center;max-width:480px;margin:0 auto 3.5rem;line-height:1.7}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease;animation:rvfb .01s linear 1.2s forwards}
+.rv.on{opacity:1;transform:translateY(0);animation:none}
+@keyframes rvfb{to{opacity:1;transform:translateY(0)}}
+
+/* BACK BTN */
+.back-row{display:flex;justify-content:center;margin-top:3rem;padding-top:1.8rem;border-top:1px solid var(--br)}
+.btn-back{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.6rem;background:transparent;border:1px solid var(--br);color:var(--tm);font-family:'Inter',sans-serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:all .3s}
+.btn-back:hover{border-color:var(--bb);color:var(--gold)}
+
+/* CARTA NATAL */
+#carta-natal{background:linear-gradient(180deg,var(--abyss) 0%,var(--dp) 50%,var(--abyss) 100%);max-width:920px;margin:0 auto}
+.carta-form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.3rem;margin-bottom:1.2rem}
+.fg{display:flex;flex-direction:column;gap:.4rem}
+.fg label{font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gd)}
+.fg input{background:rgba(201,168,76,.03);border:1px solid var(--br);padding:.85rem 1rem;color:var(--tp);font-family:'Inter',sans-serif;font-size:.82rem;outline:none;transition:border-color .3s;-webkit-appearance:none;color-scheme:dark}
+.fg input:focus{border-color:var(--gold);background:rgba(201,168,76,.06)}
+.fg input::placeholder{color:var(--tm)}
+.carta-btns-row{display:flex;gap:.8rem;margin-bottom:2rem}
+.carta-btn{flex:1;padding:1rem;background:transparent;border:1px solid var(--gold);color:var(--gl);font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;letter-spacing:.12em;cursor:pointer;transition:all .4s}
+.carta-btn:hover{background:rgba(201,168,76,.08)}
+.carta-btn-clear,.carta-btn-reset{padding:1rem 1.2rem;background:transparent;border:1px solid var(--br);color:var(--tm);font-family:'Inter',sans-serif;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.carta-btn-clear:hover,.carta-btn-reset:hover{border-color:rgba(201,168,76,.4);color:var(--ts)}
+.carta-loading{display:none;flex-direction:column;align-items:center;gap:1.2rem;padding:2.5rem 0}
+.carta-loading.show{display:flex}
+.carta-loading-ring{width:52px;height:52px;border:1px solid var(--br);border-top-color:var(--gold);border-radius:50%;animation:cspin 1.1s linear infinite}
+@keyframes cspin{to{transform:rotate(360deg)}}
+.carta-loading p{font-family:'Cormorant Garamond',serif;font-size:.9rem;font-style:italic;color:var(--ts)}
+.carta-error{display:none;padding:1rem 1.4rem;border:1px solid rgba(255,80,80,.3);background:rgba(255,50,50,.04);color:rgba(255,160,160,.8);font-family:'Cormorant Garamond',serif;font-size:.88rem;font-style:italic;text-align:center;margin-bottom:1.5rem}
+.carta-error.show{display:block}
+.carta-result{display:none;flex-direction:column;align-items:center;gap:2rem}
+.carta-result.show{display:flex}
+.carta-meta{width:100%;display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;padding-bottom:1rem;border-bottom:1px solid var(--br)}
+.cm-tag{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;padding:.3rem .75rem;border:1px solid var(--br);color:var(--ts)}
+/* Controles rueda */
+.carta-wheel-controls{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center;width:100%}
+.cwc-btn{padding:.48rem 1.1rem;border:1px solid var(--br);background:transparent;color:var(--ts);font-family:'Inter',sans-serif;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.cwc-btn:hover,.cwc-btn.active{border-color:var(--bb);color:var(--gold);background:rgba(201,168,76,.05)}
+.carta-wheel-wrap{display:flex;gap:2.5rem;flex-wrap:wrap;justify-content:center;align-items:flex-start;width:100%}
+/* Tabla posiciones */
+.pos-table{width:100%;max-width:320px}
+.pos-table-head{font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gd);margin-bottom:.7rem}
+.pos-row{display:flex;align-items:center;gap:.6rem;padding:.45rem .6rem;border-bottom:1px solid rgba(201,168,76,.06);cursor:pointer;transition:background .2s}
+.pos-row:hover,.pos-row.on{background:rgba(201,168,76,.05)}
+.pos-sym{font-size:1rem;width:22px;text-align:center;flex-shrink:0}
+.pos-name{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gd);flex:1}
+.pos-sign{font-family:'Cormorant Garamond',serif;font-size:.88rem;color:var(--tp)}
+.pos-deg{font-size:.6rem;color:var(--tm);flex-shrink:0}
+.pos-house{font-size:.52rem;color:var(--tm);flex-shrink:0;width:32px;text-align:right}
+.casas-wrap{width:100%;max-width:680px}
+.casas-head{font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gd);margin-bottom:.7rem;text-align:center}
+.casas-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.4rem}
+.casa-cell{padding:.45rem .3rem;border:1px solid var(--br);background:rgba(201,168,76,.02);text-align:center}
+.casa-num{font-size:.48rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gd);display:block;margin-bottom:.2rem}
+.casa-val{font-family:'Cormorant Garamond',serif;font-size:.78rem;color:var(--tp)}
+.elem-summary{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;width:100%;padding:1rem 0;border-top:1px solid var(--br)}
+.es-item{text-align:center}
+.es-count{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);display:block}
+.es-label{font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gd)}
+.planet-tip{padding:.9rem 1.1rem;border-left:2px solid var(--gold);background:rgba(201,168,76,.04);min-height:58px;max-width:320px;width:100%;margin-top:.8rem}
+.planet-tip p{font-family:'Cormorant Garamond',serif;font-size:.88rem;font-style:italic;color:var(--ts);line-height:1.65}
+/* Botón descarga de sección */
+.section-dl-bar{display:flex;justify-content:center;margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid var(--br)}
+.section-dl{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem 1.2rem;border:1px solid var(--br);background:transparent;color:var(--tm);font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.section-dl:hover{border-color:var(--bb);color:var(--gold);background:rgba(201,168,76,.05)}
+
+/* ELEMENTOS */
+#elementos{background:linear-gradient(180deg,var(--abyss) 0%,rgba(10,5,25,.95) 100%);max-width:1100px;margin:0 auto}
+.elem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--br)}
+.ec{padding:2.8rem 1.8rem;background:var(--abyss);text-align:center;cursor:pointer;transition:all .5s;position:relative;overflow:hidden}
+.ec::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .5s}
+.ec.fuego::before{background:radial-gradient(circle at 50% 80%,rgba(139,58,26,.4),transparent 70%)}
+.ec.tierra::before{background:radial-gradient(circle at 50% 80%,rgba(26,48,32,.6),transparent 70%)}
+.ec.aire::before{background:radial-gradient(circle at 50% 80%,rgba(21,30,48,.6),transparent 70%)}
+.ec.agua::before{background:radial-gradient(circle at 50% 80%,rgba(11,48,80,.6),transparent 70%)}
+.ec:hover::before,.ec.active::before{opacity:1}
+.ec:hover,.ec.active{transform:translateY(-3px)}
+.ec-icon{font-size:2.3rem;margin-bottom:1rem;display:block}
+.ec-name{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gl);margin-bottom:.4rem}
+.ec-sign{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gd);margin-bottom:.8rem;display:block}
+.ec-desc{font-family:'Cormorant Garamond',serif;font-size:.88rem;font-style:italic;color:var(--tm);line-height:1.55}
+.tag{font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;padding:.22rem .55rem;border:1px solid var(--br);color:var(--tm);display:inline-block;margin:.15rem}
+
+/* PENDULO */
+#pendulo{background:linear-gradient(180deg,var(--abyss) 0%,rgba(18,10,46,.8) 50%,var(--abyss) 100%);text-align:center}
+.pend-wrap{max-width:480px;margin:0 auto}
+.pend-input{width:100%;background:transparent;border:0;border-bottom:1px solid var(--br);padding:.9rem 0;color:var(--tp);font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;text-align:center;outline:none;transition:border-color .3s;margin-bottom:1.5rem}
+.pend-input:focus{border-bottom-color:var(--gold)}
+.pend-input::placeholder{color:var(--tm)}
+#pend-canvas{display:block;margin:0 auto}
+.pend-ans{margin-top:1.2rem;min-height:50px;display:flex;align-items:center;justify-content:center}
+.pend-ans p{font-family:'Playfair Display',serif;font-size:1.6rem;font-style:italic;color:var(--gold);opacity:0;transition:opacity .8s}
+.pend-ans p.show{opacity:1}
+.pend-btn{margin-top:1.2rem;padding:.85rem 2.2rem;border:1px solid var(--bb);background:transparent;color:var(--gold);font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.pend-btn:hover{background:rgba(201,168,76,.06)}
+
+/* CHAKRAS */
+#chakras{max-width:1060px;margin:0 auto}
+.ch-diag{max-width:680px;margin:0 auto 2.8rem;text-align:center}
+.ch-diag-q{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-style:italic;color:var(--ts);margin-bottom:1.4rem;line-height:1.6}
+.ch-diag-q strong{font-family:'Playfair Display',serif;font-style:normal;color:var(--gl);display:block;font-size:1.15rem;margin-bottom:.35rem}
+.ch-diag-tags{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:1.4rem}
+.ch-dtag{padding:.38rem .9rem;border:1px solid var(--br);background:transparent;color:var(--tm);font-family:'Inter',sans-serif;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .28s;user-select:none}
+.ch-dtag:hover{border-color:rgba(201,168,76,.4);color:var(--ts)}
+.ch-dtag.sel{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+.ch-diag-hint{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tm);margin-bottom:1.1rem}
+.ch-diag-btn{padding:.75rem 2rem;border:1px solid var(--bb);background:transparent;color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:.95rem;font-style:italic;letter-spacing:.1em;cursor:pointer;transition:all .35s;opacity:.4;pointer-events:none}
+.ch-diag-btn.ready{opacity:1;pointer-events:all}
+.ch-diag-btn.ready:hover{background:rgba(201,168,76,.07);box-shadow:0 0 22px rgba(201,168,76,.14)}
+.ch-layout{display:grid;grid-template-columns:1fr 270px 1fr;gap:2.5rem;align-items:center}
+.ch-col{display:flex;flex-direction:column;gap:1.1rem}
+.chi{padding:.9rem 1.1rem;border:1px solid var(--br);background:rgba(201,168,76,.02);cursor:pointer;transition:all .32s;position:relative;overflow:hidden}
+.chi::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .35s;pointer-events:none}
+.chi:hover{border-color:var(--bb);background:rgba(201,168,76,.04)}
+.chi.on{border-color:var(--bb);background:rgba(201,168,76,.06);transform:scale(1.02)}
+.chi.diag-match{animation:chPulse 1.4s ease 3}
+.chi.diag-dim{opacity:.3}
+@keyframes chPulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 22px var(--ch-color,rgba(201,168,76,.4))}}
+.chi-sk{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gd);display:block;margin-bottom:.2rem}
+.chi-name{font-family:'Playfair Display',serif;font-size:.9rem;color:var(--tp);margin-bottom:.18rem;transition:color .3s}
+.chi.on .chi-name{color:var(--gold)}
+.chi-desc{font-family:'Cormorant Garamond',serif;font-size:.8rem;font-style:italic;color:var(--tm);line-height:1.42}
+.chi-dot{width:8px;height:8px;border-radius:50%;position:absolute;right:.9rem;top:50%;transform:translateY(-50%);transition:box-shadow .3s}
+.chi.on .chi-dot{box-shadow:0 0 14px var(--chi-glow,rgba(201,168,76,.6)) !important}
+.ch-hover-lbl{position:absolute;background:rgba(7,7,26,.92);border:1px solid var(--bb);padding:.3rem .7rem;font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);pointer-events:none;white-space:nowrap;transition:opacity .2s;opacity:0;z-index:10}
+.ch-hover-lbl.show{opacity:1}
+#ch-canvas{display:block;cursor:crosshair}
+.ch-canvas-wrap{position:relative;display:flex;justify-content:center}
+.ch-detail{max-width:800px;margin:2.5rem auto 0;display:none;border:1px solid var(--br);background:rgba(201,168,76,.02);animation:chDetailIn .45s ease forwards}
+.ch-detail.show{display:block}
+@keyframes chDetailIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.ch-detail-header{display:flex;align-items:center;gap:1.2rem;padding:1.5rem 1.8rem;border-bottom:1px solid var(--br)}
+.ch-detail-orb{width:44px;height:44px;border-radius:50%;flex-shrink:0}
+.ch-detail-hinfo{flex:1}
+.ch-detail-sk{font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gd);display:block}
+.ch-detail-name{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gl)}
+.ch-detail-close{background:transparent;border:1px solid var(--br);color:var(--tm);font-size:.9rem;cursor:pointer;width:26px;height:26px;display:flex;align-items:center;justify-content:center;transition:all .3s;border-radius:2px;flex-shrink:0}
+.ch-detail-close:hover{border-color:var(--bb);color:var(--gl)}
+.ch-detail-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.ch-detail-col{padding:1.5rem 1.8rem}
+.ch-detail-col+.ch-detail-col{border-left:1px solid var(--br)}
+.ch-det-label{font-size:.5rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gd);margin-bottom:.6rem;display:block}
+.ch-det-txt{font-family:'Cormorant Garamond',serif;font-size:.9rem;font-style:italic;color:var(--ts);line-height:1.65;margin-bottom:1rem}
+.ch-det-symptom{font-size:.72rem;color:var(--tm);margin:.18rem 0;padding-left:.8rem;position:relative;font-family:'Cormorant Garamond',serif;font-style:italic}
+.ch-det-symptom::before{content:'·';position:absolute;left:0;color:var(--gd)}
+.ch-tools{padding:1.5rem 1.8rem;border-top:1px solid var(--br)}
+.ch-tools-label{font-size:.5rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gd);margin-bottom:.9rem;display:block}
+.ch-tools-grid{display:flex;gap:.7rem;flex-wrap:wrap}
+.ch-tool{display:flex;flex-direction:column;align-items:center;gap:.3rem;padding:.7rem .9rem;border:1px solid var(--br);background:transparent;color:var(--tm);cursor:pointer;min-width:72px;transition:all .3s;font-family:'Inter',sans-serif}
+.ch-tool:hover{border-color:var(--bb);color:var(--gold);background:rgba(201,168,76,.05);transform:translateY(-2px)}
+.ch-tool.active-tool{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+.ch-tool-icon{font-size:1.4rem;display:block}
+.ch-tool-name{font-size:.46rem;letter-spacing:.15em;text-transform:uppercase}
+.ch-recipe{padding:1.4rem 1.8rem;border-top:1px solid var(--br);display:none;animation:chDetailIn .35s ease forwards}
+.ch-recipe.show{display:block}
+.ch-recipe-title{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gl);margin-bottom:.3rem}
+.ch-recipe-sub{font-family:'Cormorant Garamond',serif;font-size:.82rem;font-style:italic;color:var(--gd);margin-bottom:1rem}
+.ch-recipe-steps{display:flex;flex-direction:column;gap:.6rem}
+.ch-recipe-step{display:flex;gap:.8rem;align-items:flex-start}
+.ch-recipe-step-n{font-size:.52rem;letter-spacing:.18em;color:var(--gold);flex-shrink:0;margin-top:.18rem}
+.ch-recipe-step-txt{font-family:'Cormorant Garamond',serif;font-size:.88rem;font-style:italic;color:var(--ts);line-height:1.58}
+.ch-recipe-btn{margin-top:1.2rem;padding:.7rem 1.8rem;border:1px solid var(--bb);background:transparent;color:var(--gold);font-family:'Inter',sans-serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.ch-recipe-btn:hover{background:rgba(201,168,76,.07)}
+
+/* TAROT */
+#tarot{background:linear-gradient(180deg,var(--abyss) 0%,var(--dp) 100%);text-align:center}
+.tirada-nav{display:flex;justify-content:center;gap:.4rem;flex-wrap:wrap;margin-bottom:1.8rem}
+.t-btn{padding:.48rem 1.1rem;background:transparent;border:1px solid var(--br);color:var(--tm);font-family:'Inter',sans-serif;font-size:.56rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.t-btn.on,.t-btn:hover{border-color:var(--bb);color:var(--gold);background:rgba(201,168,76,.05)}
+.t-info{text-align:center;margin-bottom:1.3rem;font-family:'Cormorant Garamond',serif;font-size:.88rem;font-style:italic;color:var(--tm)}
+.t-info strong{color:var(--gold);font-family:'Inter',sans-serif;font-size:.62rem;font-style:normal;letter-spacing:.1em}
+.deck-picker{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:980px;margin:0 auto 1.8rem}
+.dmc{width:65px;height:96px;cursor:pointer;perspective:600px;position:relative;flex-shrink:0}
+.dmc-inner{width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.23,1,.32,1);position:relative}
+.dmc.sel .dmc-inner{transform:rotateY(180deg)}
+.dmc:hover:not(.sel) .dmc-inner{transform:rotateY(22deg) translateY(-3px)}
+.dface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:2px;overflow:hidden}
+.dback{background:linear-gradient(160deg,#1E0840,#0A0520);border:1px solid rgba(201,168,76,.22);display:flex;align-items:center;justify-content:center}
+.dfront{background:#F5EFD8;border:1px solid rgba(201,168,76,.55);transform:rotateY(180deg);display:flex;flex-direction:column;overflow:hidden}
+.dfront img{width:100%;flex:1;object-fit:cover;display:block;min-height:0}
+.dfront-label{background:#1A0A30;padding:2px 3px;text-align:center;font-family:'Cormorant Garamond',serif;font-size:.4rem;color:var(--gold);font-style:italic;flex-shrink:0}
+.dmc.sel::after{content:'✦';position:absolute;top:2px;right:4px;font-size:.45rem;color:var(--gold);z-index:10;pointer-events:none;text-shadow:0 0 6px rgba(201,168,76,.8)}
+.deck-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem}
+.shuf-btn{padding:.85rem 2.2rem;background:transparent;border:1px solid var(--bb);color:var(--gold);font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.shuf-btn:hover{background:rgba(201,168,76,.06)}
+.shuf-btn:disabled{opacity:.38;pointer-events:none}
+.tirada-result{display:none;max-width:940px;margin:0 auto}
+.tirada-result.show{display:block}
+.tr-cards{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem}
+.tr-card{width:105px;display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.tr-cv{width:105px;height:160px;overflow:hidden;border:1px solid var(--bb);border-radius:2px;background:#F5EFD8;box-shadow:0 4px 18px rgba(0,0,0,.5)}
+.tr-cv img{width:100%;height:100%;object-fit:cover;display:block}
+.tr-pos{font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gd);text-align:center}
+.tr-interp{border:1px solid var(--br);background:rgba(201,168,76,.02);padding:1.8rem}
+.tr-interp-title{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gl);margin-bottom:1.3rem;text-align:center}
+.tr-row{display:grid;grid-template-columns:70px 1fr;gap:.9rem;align-items:start;padding-bottom:1rem;margin-bottom:1rem;border-bottom:1px solid var(--br)}
+.tr-row:last-child{border-bottom:0;padding-bottom:0;margin-bottom:0}
+.tr-row img{width:70px;height:105px;object-fit:cover;border-radius:2px;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.tr-card-name{font-family:'Playfair Display',serif;font-size:.88rem;color:var(--gold);margin-bottom:.2rem}
+.tr-card-pos{font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gd);display:block;margin-bottom:.35rem}
+.tr-card-txt{font-family:'Cormorant Garamond',serif;font-size:.9rem;font-style:italic;color:var(--ts);line-height:1.62}
+.new-btn{display:block;margin:1.5rem auto 0;padding:.75rem 2.2rem;background:transparent;border:1px solid var(--bb);color:var(--gold);font-family:'Inter',sans-serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.new-btn:hover{background:rgba(201,168,76,.06)}
+.shuf-reset{border-color:var(--br)!important;color:var(--ts)!important}
+.shuf-reset:hover{border-color:rgba(201,168,76,.4)!important;color:var(--tp)!important}
+/* Arcanos grid última fila centrada */
+.arc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:0 .5rem;justify-items:center}
+.arc-grid::after{content:'';flex:auto}
+/* Arcanos barajar fila */
+.arc-shuffle-row{display:flex;align-items:center;justify-content:center;gap:1rem;margin-bottom:1.2rem}
+.arc-shuf-btn{padding:.48rem 1.4rem;background:transparent;border:1px solid var(--bb);color:var(--gold);font-family:'Inter',sans-serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.arc-shuf-btn:hover{background:rgba(201,168,76,.07)}
+.arc-reset-btn{padding:.48rem 1.2rem;background:transparent;border:1px solid var(--br);color:var(--ts);font-family:'Inter',sans-serif;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.arc-reset-btn:hover{border-color:rgba(201,168,76,.35);color:var(--tp)}
+/* Cartas arcanos — modo oculto */
+.arc-card-hidden .arc-img-wrap{background:linear-gradient(160deg,#1E0840,#0A0520);border:1px solid rgba(201,168,76,.22)}
+.arc-card-hidden .arc-img-wrap img{opacity:0;position:absolute}
+.arc-card-hidden .arc-img-wrap::after{content:'✦';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:rgba(201,168,76,.35)}
+.arc-card-hidden .arc-name{color:var(--tm)}
+.arc-card-hidden .arc-elem{opacity:.5}
+
+/* ALTAR */
+#altar{text-align:center;padding:6rem 2rem;background:linear-gradient(180deg,var(--abyss) 0%,rgba(30,10,5,.9) 50%,var(--abyss) 100%)}
+#fire-canvas{width:100%;max-width:680px;height:180px;display:block;margin:0 auto}
+.altar-ta{width:100%;max-width:680px;background:rgba(139,58,26,.05);border:1px solid rgba(139,58,26,.3);padding:1.4rem;color:var(--tp);font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;line-height:1.65;resize:none;height:130px;outline:none;transition:border-color .3s;display:block;margin:0 auto 1.2rem}
+.altar-ta:focus{border-color:rgba(201,168,76,.4)}
+.altar-ta::placeholder{color:var(--tm)}
+.altar-fire-btn{padding:.95rem 2.8rem;background:linear-gradient(135deg,rgba(139,58,26,.3),rgba(201,100,50,.15));border:1px solid rgba(201,100,50,.5);color:var(--gl);font-family:'Cormorant Garamond',serif;font-size:.95rem;font-style:italic;letter-spacing:.1em;cursor:pointer;transition:all .4s}
+.altar-fire-btn:hover{background:linear-gradient(135deg,rgba(200,80,30,.3),rgba(139,58,26,.2));box-shadow:0 0 36px rgba(200,80,30,.2)}
+.altar-msg{margin-top:1.3rem;font-family:'Playfair Display',serif;font-size:1rem;font-style:italic;color:var(--gold);opacity:0;transition:opacity 1s;min-height:1.8rem}
+.altar-msg.show{opacity:1}
+
+/* SERVICIOS */
+#servicios{background:linear-gradient(180deg,var(--abyss) 0%,var(--dp) 100%);max-width:1050px;margin:0 auto}
+.serv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--br)}
+.sc{background:var(--abyss);padding:2.8rem 1.8rem;text-align:center;cursor:pointer;transition:all .4s;position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,var(--gold),transparent);transform:scaleX(0);transition:transform .4s}
+.sc:hover::after{transform:scaleX(1)}
+.sc:hover{background:rgba(201,168,76,.03)}
+.sc-icon{font-size:1.9rem;margin-bottom:1.1rem;display:block}
+.sc-title{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gl);margin-bottom:.4rem}
+.sc-elem{font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gd);margin-bottom:.9rem;display:block}
+.sc-desc{font-family:'Cormorant Garamond',serif;font-size:.88rem;font-style:italic;color:var(--tm);line-height:1.55;margin-bottom:1.3rem}
+.sc-price{font-family:'Playfair Display',serif;font-size:1.45rem;color:var(--gold);margin-bottom:.9rem}
+.sc-price span{font-size:.72rem;font-family:'Inter',sans-serif;color:var(--gd)}
+.btn-ag{padding:.65rem 1.6rem;border:1px solid var(--bb);background:transparent;color:var(--gold);font-family:'Inter',sans-serif;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.btn-ag:hover{background:rgba(201,168,76,.08)}
+
+/* ARCANOS */
+#arcanos{max-width:1360px;margin:0 auto}
+.arc-top{display:flex;flex-direction:column;align-items:center;gap:1rem;margin-bottom:1.8rem}
+.arc-search{width:320px;max-width:100%;background:rgba(201,168,76,.03);border:0;border-bottom:1px solid var(--br);padding:.7rem 0;color:var(--tp);font-family:'Cormorant Garamond',serif;font-size:.95rem;font-style:italic;text-align:center;outline:none;transition:border-color .3s}
+.arc-search:focus{border-bottom-color:var(--gold)}
+.arc-search::placeholder{color:var(--tm)}
+.arc-filters{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center}
+.af-btn{padding:.42rem 1rem;background:transparent;border:1px solid var(--br);color:var(--tm);font-family:'Inter',sans-serif;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.af-btn.on,.af-btn:hover{border-color:var(--bb);color:var(--gold);background:rgba(201,168,76,.05)}
+.arc-count{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--tm);text-align:center;margin-bottom:1.5rem}
+.arc-count span{color:var(--gold)}
+.arc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:0 .5rem}
+.arc-card{cursor:pointer;transition:transform .3s,box-shadow .3s;position:relative;display:flex;flex-direction:column}
+.arc-card:hover{transform:translateY(-5px) scale(1.02);z-index:2}
+.arc-img-wrap{position:relative;width:100%;aspect-ratio:2/3;overflow:hidden;border:1px solid rgba(201,168,76,.18);background:linear-gradient(160deg,#1A0A30,#07071A)}
+.arc-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.arc-card:hover .arc-img-wrap img{transform:scale(1.05)}
+.arc-num{position:absolute;top:5px;left:5px;background:rgba(7,7,26,.85);border:1px solid rgba(201,168,76,.38);font-family:'Cormorant Garamond',serif;font-size:.52rem;letter-spacing:.18em;color:var(--gd);padding:2px 5px;backdrop-filter:blur(3px)}
+.arc-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(7,7,26,.95) 0%,rgba(7,7,26,.35) 50%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:.7rem .55rem;opacity:0;transition:opacity .3s}
+.arc-card:hover .arc-overlay{opacity:1}
+.arc-kw{font-family:'Cormorant Garamond',serif;font-size:.7rem;font-style:italic;color:var(--gold);text-align:center}
+.arc-hint{font-family:'Inter',sans-serif;font-size:.48rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tm);text-align:center;margin-top:.25rem}
+.arc-info{padding:.55rem .3rem .4rem;text-align:center}
+.arc-name{font-family:'Playfair Display',serif;font-size:.78rem;color:var(--tp);display:block;margin-bottom:.15rem;line-height:1.2}
+.arc-elem{font-size:.48rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gd)}
+
+/* ARCANO MODAL */
+#am-overlay{position:fixed;inset:0;background:rgba(7,7,26,.96);z-index:1001;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s;padding:1.5rem;overflow-y:auto}
+#am-overlay.on{opacity:1;pointer-events:all}
+.am-modal{max-width:800px;width:100%;border:1px solid var(--bb);background:var(--dp);display:grid;grid-template-columns:210px 1fr;position:relative;transform:translateY(18px) scale(.98);transition:transform .4s;overflow:hidden;max-height:88vh}
+#am-overlay.on .am-modal{transform:translateY(0) scale(1)}
+.am-art{background:#0A0415;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:1.8rem 1.1rem 1.3rem;border-right:1px solid var(--br);gap:.9rem;overflow-y:auto}
+.am-card-img{width:148px;height:240px;overflow:hidden;border:2px solid rgba(201,168,76,.38);box-shadow:0 0 25px rgba(100,60,200,.25);flex-shrink:0}
+.am-card-img img{width:100%;height:100%;object-fit:cover;display:block}
+.am-num{font-family:'Cormorant Garamond',serif;font-size:.6rem;letter-spacing:.3em;color:var(--gd);text-align:center}
+.am-body{padding:1.8rem 1.8rem;overflow-y:auto}
+.am-title{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--gl);margin-bottom:.25rem}
+.am-kw{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-style:italic;color:var(--gold);display:block;margin-bottom:1.1rem}
+.am-badges{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.3rem}
+.am-badge{font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;padding:.22rem .65rem;border:1px solid var(--bb);color:var(--gd)}
+.am-sec{margin-bottom:1.1rem}
+.am-sec h5{font-family:'Inter',sans-serif;font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gd);margin-bottom:.4rem}
+.am-sec p{font-family:'Cormorant Garamond',serif;font-size:.92rem;font-style:italic;color:var(--ts);line-height:1.65}
+.am-close{position:absolute;top:.7rem;right:.9rem;background:rgba(7,7,26,.8);border:1px solid var(--br);color:var(--tm);font-size:1rem;cursor:pointer;z-index:10;transition:all .3s;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:2px}
+.am-close:hover{color:var(--gl);border-color:var(--bb)}
+
+/* MODAL AGENDAR */
+.modal-ov{position:fixed;inset:0;background:rgba(7,7,26,.95);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+.modal-ov.on{opacity:1;pointer-events:all}
+.modal{max-width:480px;width:90%;border:1px solid var(--bb);background:var(--dp);padding:2.8rem;position:relative;transform:translateY(18px);transition:transform .4s}
+.modal-ov.on .modal{transform:translateY(0)}
+.modal-close{position:absolute;top:.9rem;right:1.3rem;background:none;border:none;color:var(--tm);font-size:1.1rem;cursor:pointer;transition:color .3s}
+.modal-close:hover{color:var(--gl)}
+.modal h3{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gl);margin-bottom:.4rem}
+.modal p{font-family:'Cormorant Garamond',serif;font-size:.88rem;font-style:italic;color:var(--ts);margin-bottom:1.8rem}
+.modal-form{display:flex;flex-direction:column;gap:.9rem}
+.modal-form input,.modal-form select{padding:.85rem 1rem;background:rgba(201,168,76,.03);border:1px solid var(--br);color:var(--tp);font-family:'Inter',sans-serif;font-size:.82rem;outline:none;transition:border-color .3s;-webkit-appearance:none;color-scheme:dark}
+.modal-form input:focus,.modal-form select:focus{border-color:var(--gold)}
+.modal-submit{padding:1rem;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid var(--gold);color:var(--gl);font-family:'Cormorant Garamond',serif;font-size:.95rem;font-style:italic;letter-spacing:.1em;cursor:pointer;transition:all .3s;margin-top:.4rem}
+.modal-submit:hover{background:rgba(201,168,76,.12)}
+/* Calendario */
+.cal-wrap{border:1px solid var(--br);padding:1rem;background:rgba(201,168,76,.02)}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+.cal-nav{background:transparent;border:1px solid var(--br);color:var(--ts);font-size:1rem;width:28px;height:28px;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center}
+.cal-nav:hover{border-color:var(--bb);color:var(--gold)}
+.cal-month-lbl{font-family:'Playfair Display',serif;font-size:.88rem;color:var(--gl);letter-spacing:.08em}
+.cal-days-head{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.cal-days-head span{text-align:center;font-size:.48rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gd);padding:.25rem 0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.72rem;color:var(--tm);cursor:default;border-radius:2px;transition:all .22s;position:relative}
+.cal-cell.other-month{opacity:.22}
+.cal-cell.today{color:var(--gold);font-weight:500}
+.cal-cell.today::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--gold)}
+.cal-cell.past{opacity:.2;pointer-events:none}
+.cal-cell.available{color:var(--ts);cursor:pointer}
+.cal-cell.available:hover{background:rgba(201,168,76,.1);color:var(--gold)}
+.cal-cell.selected{background:rgba(201,168,76,.18);color:var(--gold);border:1px solid var(--bb)}
+.cal-cell.blocked{opacity:.2;pointer-events:none;text-decoration:line-through}
+.cal-sel-row{margin-top:.9rem;border-top:1px solid var(--br);padding-top:.9rem}
+.cal-sel-lbl{font-size:.52rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gd);display:block;margin-bottom:.6rem}
+.cal-slots{display:flex;flex-wrap:wrap;gap:.4rem}
+.cal-slot{padding:.32rem .75rem;border:1px solid var(--br);color:var(--tm);font-family:'Inter',sans-serif;font-size:.6rem;cursor:pointer;transition:all .22s}
+.cal-slot:hover{border-color:var(--bb);color:var(--gold)}
+.cal-slot.sel-slot{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.1)}
+.cal-slot.taken{opacity:.3;pointer-events:none;text-decoration:line-through}
+.cal-chosen{display:flex;align-items:center;justify-content:space-between;padding:.65rem .9rem;border:1px solid var(--bb);background:rgba(201,168,76,.06);margin-top:.2rem}
+.cal-chosen span{font-family:'Cormorant Garamond',serif;font-size:.88rem;font-style:italic;color:var(--gold)}
+.cal-chosen-clear{background:transparent;border:none;color:var(--tm);cursor:pointer;font-size:.85rem;transition:color .2s}
+.cal-chosen-clear:hover{color:var(--gl)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+.f-logo{font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--gold);letter-spacing:.15em}
+.f-logo em{font-style:italic;color:var(--gl)}
+.f-links{display:flex;gap:1.8rem;list-style:none}
+.f-links a{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--tm);text-decoration:none;transition:color .3s}
+.f-links a:hover{color:var(--gl)}
+.f-copy{font-size:.62rem;color:var(--tm);letter-spacing:.08em;font-family:'Cormorant Garamond',serif;font-style:italic}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:1.1rem 1.5rem}
+  .nav-links{display:none}
+  section{padding:5rem 1.5rem}
+  .carta-form{grid-template-columns:1fr}
+  .elem-grid{grid-template-columns:repeat(2,1fr)}
+  .ch-layout{grid-template-columns:1fr}
+  .serv-grid{grid-template-columns:1fr}
+  .arc-grid{grid-template-columns:repeat(auto-fill,minmax(108px,1fr))}
+  .am-modal{grid-template-columns:1fr}
+  .am-art{border-right:none;border-bottom:1px solid var(--br);flex-direction:row;gap:1.2rem;padding:1.2rem}
+  .am-card-img{width:80px;height:130px}
+  footer{flex-direction:column;gap:1.5rem;text-align:center}
+  .carta-wheel-wrap{flex-direction:column;align-items:center}
+}
+@media(max-width:600px){
+  .elem-grid{grid-template-columns:1fr}
+  .arc-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr))}
+}
+</style>
+
+<style>
+/* MODULE / TABS */
+.module-section{position:relative;z-index:1;padding:6rem 4rem}
+.tab-nav{display:flex;flex-wrap:wrap;gap:.7rem;justify-content:center;margin-bottom:3.5rem}
+.tab-btn{padding:.75rem 1.6rem;background:transparent;border:1px solid var(--br);color:var(--ts);font-family:'Inter',sans-serif;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap}
+.tab-btn:hover{border-color:var(--bb);color:var(--tp)}
+.tab-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.info-block{max-width:700px;margin:0 auto;text-align:center}
+.info-block h3{font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--gl);margin-bottom:1.1rem;font-weight:400}
+.info-block h3 em{font-style:italic;color:var(--gold)}
+.info-block p{font-family:'Cormorant Garamond',serif;font-size:1.05rem;line-height:1.8;color:var(--ts);margin-bottom:1.1rem}
+.info-icon{font-size:2.2rem;display:block;margin-bottom:1.1rem}
+.info-cta{margin-top:1.6rem;padding:.9rem 2.2rem;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid var(--gold);color:var(--gl);font-family:'Inter',sans-serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .4s}
+.info-cta:hover{box-shadow:0 0 28px rgba(201,168,76,.25)}
+.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem;text-align:left;margin:1.6rem 0}
+.info-grid .ig-item{border:1px solid var(--br);padding:1.1rem 1.3rem;background:rgba(201,168,76,.02)}
+.info-grid .ig-item h4{font-family:'Playfair Display',serif;font-size:.92rem;color:var(--gold);margin-bottom:.4rem;font-weight:400}
+.info-grid .ig-item p{font-size:.88rem;margin-bottom:0;line-height:1.6}
+@media(max-width:720px){
+  .module-section{padding:4rem 1.4rem}
+  .info-grid{grid-template-columns:1fr}
+  .tab-btn{font-size:.58rem;padding:.65rem 1.1rem}
+}
+</style>
+
+</head>
+<body>
+
+<div id="cur">ॐ</div>
+<div id="cur-ring"></div>
+<canvas id="bg-canvas"></canvas>
+<div class="sketch-layer" id="sketch-layer"></div>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="#" class="logo">TA<em>-ROD</em></a>
+  <ul class="nav-links">
+    <li><a href="#modulo-tarot">Tarot</a></li>
+    <li><a href="#modulo-astrologia">Astrología</a></li>
+    <li><a href="#modulo-chamanismo">Chamanismo</a></li>
+    <li><a href="#modulo-akashicos">Registros Akásicos</a></li>
+    <li><a href="#modulo-sanacion">Espacio de Sanación</a></li>
+    <li><a href="#servicios">Sesiones</a></li>
+  </ul>
+  <button class="nav-cta" onclick="openModal()">Agendar Sesión</button>
+  <a href="tel:+50688215669" class="nav-tel">📞 8821-5669</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="zodiac-canvas" width="600" height="600"></canvas>
+  <p class="hero-eyebrow">Tarot · Astrología · Chamanismo</p>
+  <h1 class="hero-title">TA<em>-ROD</em></h1>
+  <p class="hero-sub">Donde las estrellas hablan y el alma recuerda su camino</p>
+  <div class="hero-btns">
+    <button class="btn-p" onclick="goTo('carta-natal')">Calcular mi Carta Natal</button>
+    <button class="btn-g" onclick="goTo('pendulo')">Consultar el Péndulo</button>
+  </div>
+  <div class="scroll-hint"><div class="scroll-line"></div><span>Descender</span></div>
+</section>
+
+
+<!-- ============ MODULO: TAROT ============ -->
+<section id="modulo-tarot" class="module-section" style="background:linear-gradient(180deg,var(--abyss) 0%,var(--dp) 100%)">
+  <div class="divider"></div>
+  <p class="eyebrow">Oráculo de los Arquetipos</p>
+  <h2 class="sec-title rv">Tiradas de <em>Tarot</em></h2>
+  <p class="sec-sub rv">Elige tu camino de lectura: una tirada guiada con el mazo completo o la galería de los 22 Arcanos Mayores</p>
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="tarot" onclick="activateTab('modulo-tarot','tarot')">✦ Tiradas de Tarot</button>
+    <button class="tab-btn" data-tab="arcanos" onclick="activateTab('modulo-tarot','arcanos')">◈ Arcanos Mayores</button>
+  </div>
+  <!-- TAROT -->
+<div class="tab-panel active" id="tarot" data-module="modulo-tarot" data-tab="tarot" style="background:linear-gradient(180deg,var(--abyss) 0%,var(--dp) 100%)">
+  <div class="rv">
+    <p style="text-align:center;font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gd);margin-bottom:.9rem">Tipo de Tirada</p>
+    <div class="tirada-nav">
+      <button class="t-btn on" onclick="selTirada('unica',this)">✦ Carta Única</button>
+      <button class="t-btn" onclick="selTirada('tres',this)">◈ Pasado · Presente · Futuro</button>
+      <button class="t-btn" onclick="selTirada('cinco',this)">⬟ Cruz Celta (5)</button>
+      <button class="t-btn" onclick="selTirada('siete',this)">⊹ Herradura (7)</button>
+      <button class="t-btn" onclick="selTirada('elem',this)">⊕ Los 4 Elementos</button>
+    </div>
+    <p class="t-info" id="t-info"><em>La energía más importante que debes enfocar ahora mismo</em> — Selecciona <strong id="t-need">1 carta</strong></p>
+    <div class="deck-picker" id="deck-picker"></div>
+    <div class="deck-btns">
+      <button class="shuf-btn" onclick="shuffleDeck()">✦ Barajar Mazo ✦</button>
+      <button class="shuf-btn" id="btn-reveal" onclick="doReveal()" disabled>◈ Revelar Tirada ◈</button>
+      <button class="shuf-btn shuf-reset" onclick="resetTirada()">↺ Reiniciar</button>
+    </div>
+    <div class="tirada-result" id="tirada-result">
+      <div class="tr-cards" id="tr-cards"></div>
+      <div class="tr-interp" id="tr-interp"></div>
+      <button class="new-btn" onclick="resetTirada()">✦ Nueva Tirada ✦</button>
+    </div>
+  </div></div>
+
+
+  <!-- ARCANOS MAYORES -->
+<div class="tab-panel" id="arcanos" data-module="modulo-tarot" data-tab="arcanos" style="background:linear-gradient(180deg,var(--dp) 0%,var(--abyss) 100%)">
+  <div class="arc-top rv">
+    <input class="arc-search" id="arc-search" placeholder="Buscar un arcano..." oninput="filterArc()">
+    <div class="arc-filters">
+      <button class="af-btn on" onclick="filterElem('todos',this)">✦ Todos</button>
+      <button class="af-btn" onclick="filterElem('fuego',this)">🔥 Fuego</button>
+      <button class="af-btn" onclick="filterElem('tierra',this)">🌿 Tierra</button>
+      <button class="af-btn" onclick="filterElem('aire',this)">🌬️ Aire</button>
+      <button class="af-btn" onclick="filterElem('agua',this)">🌊 Agua</button>
+      <button class="af-btn" onclick="filterElem('espiritu',this)">✨ Espíritu</button>
+    </div>
+  </div>
+  <p class="arc-count rv">Mostrando <span id="arc-count">22</span> de 22 arcanos</p>
+  <div class="arc-shuffle-row rv">
+    <button class="arc-shuf-btn" onclick="shuffleArc()">✦ Barajar Arcanos ✦</button>
+    <button class="arc-reset-btn" onclick="resetArc()">↺ Orden Original</button>
+  </div>
+  <div class="arc-grid rv" id="arc-grid"></div></div>
+
+
+  <div class="back-row"><a href="#hero" class="btn-back">↑ Volver al inicio</a></div>
+</section>
+
+<!-- ============ MODULO: ASTROLOGIA ============ -->
+<section id="modulo-astrologia" class="module-section">
+  <div class="divider"></div>
+  <p class="eyebrow">Motor Astronómico</p>
+  <h2 class="sec-title rv"><em>Astrología</em></h2>
+  <p class="sec-sub rv">Tu mapa cósmico, tu ciclo anual y las fuerzas elementales que te habitan</p>
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="carta-natal" onclick="activateTab('modulo-astrologia','carta-natal')">Carta Natal</button>
+    <button class="tab-btn" data-tab="revolucion-solar" onclick="activateTab('modulo-astrologia','revolucion-solar')">Revolución Solar</button>
+    <button class="tab-btn" data-tab="elementos" onclick="activateTab('modulo-astrologia','elementos')">Elementos</button>
+  </div>
+  <!-- CARTA NATAL -->
+<div class="tab-panel active" id="carta-natal" data-module="modulo-astrologia" data-tab="carta-natal">
+  <div style="max-width:920px;margin:0 auto">
+    <div class="carta-form rv">
+      <div class="fg"><label>Fecha de Nacimiento</label><input type="date" id="b-date"></div>
+      <div class="fg"><label>Hora Exacta</label><input type="time" id="b-time"></div>
+      <div class="fg"><label>Ciudad de Nacimiento</label><input type="text" id="b-city" placeholder="Ej: San José, Costa Rica"></div>
+    </div>
+    <div class="carta-btns-row rv">
+      <button class="carta-btn" onclick="calcCarta()">✦ Revelar mi Carta Natal ✦</button>
+      <button class="carta-btn-clear" onclick="clearCarta()">✕ Limpiar</button>
+      <button class="carta-btn-reset" onclick="resetCarta()">↺ Nueva Consulta</button>
+    </div>
+    <div class="carta-loading" id="carta-loading">
+      <div class="carta-loading-ring"></div>
+      <p>Consultando las esferas celestes...</p>
+    </div>
+    <div class="carta-error" id="carta-error"></div>
+    <div class="carta-result" id="carta-result">
+      <!-- meta fila -->
+      <div class="carta-meta" id="carta-meta"></div>
+      <!-- controles rueda -->
+      <div class="carta-wheel-controls">
+        <button class="cwc-btn" id="btn-toggle-lines" onclick="toggleAspectLines()">👁 Ocultar líneas de aspecto</button>
+        <button class="cwc-btn" onclick="downloadCartaDocx()">⬇ Descargar Carta (.docx)</button>
+      </div>
+      <!-- rueda + posiciones -->
+      <div class="carta-wheel-wrap">
+        <canvas id="carta-wheel" width="480" height="480"></canvas>
+        <div style="display:flex;flex-direction:column;gap:.5rem">
+          <p class="pos-table-head">Posiciones Planetarias</p>
+          <div class="pos-table" id="pos-table"></div>
+          <div class="planet-tip" id="planet-tip"><p>Selecciona un planeta para conocer su influencia chamánica...</p></div>
+        </div>
+      </div>
+      <!-- casas -->
+      <div class="casas-wrap">
+        <p class="casas-head">Casas (Sistema Placidus)</p>
+        <div class="casas-grid" id="casas-grid"></div>
+      </div>
+      <!-- elementos -->
+      <div class="elem-summary" id="elem-summary"></div>
+    </div>
+  </div></div>
+
+
+  <!-- REVOLUCIÓN SOLAR -->
+<div class="tab-panel" id="revolucion-solar" data-module="modulo-astrologia" data-tab="revolucion-solar">
+  <div class="info-block rv">
+    <span class="info-icon">🎂</span>
+    <h3>El Mapa de tu Nuevo Año Solar</h3>
+    <p>Cada año, en la fecha de tu cumpleaños, el Sol regresa al grado y minuto exactos donde estaba el día de tu nacimiento. Ese instante genera una carta astral propia — tu <strong>Revolución Solar</strong> — que describe el clima energético, los aprendizajes y las áreas de vida que estarán activas hasta tu próximo cumpleaños.</p>
+    <p>No es una técnica de adivinación: se lee sobre tu carta natal para ver qué casas y planetas se activan este ciclo. El Ascendente de la revolución marca el "tono" general del año, y la casa donde cae ese Ascendente en tu carta natal señala el área de vida — trabajo, vínculos, salud, hogar — donde tendrás más energía disponible para actuar con consciencia.</p>
+    <div class="info-grid">
+      <div class="ig-item"><h4>☉ Ascendente Anual</h4><p>La actitud y energía predominante con la que atravesarás el nuevo ciclo.</p></div>
+      <div class="ig-item"><h4>🏠 Casa Activada</h4><p>El área de tu carta natal donde se concentrará el aprendizaje del año.</p></div>
+      <div class="ig-item"><h4>☽ Luna de Revolución</h4><p>Tu tono emocional y las formas de autocuidado que el año te pedirá.</p></div>
+      <div class="ig-item"><h4>🔮 Ritual de Cumpleaños</h4><p>Una intención guiada para sembrar el nuevo ciclo con claridad.</p></div>
+    </div>
+    <p style="font-size:.85rem;color:var(--tm)">Se recomienda calcular tu Revolución Solar hasta un mes antes de tu cumpleaños, o pocos días después de celebrarlo.</p>
+    <button class="info-cta" onclick="openModal('revolucion')">✦ Agendar mi Revolución Solar ✦</button>
+  </div>
+</div>
+
+  <!-- ELEMENTOS -->
+<div class="tab-panel" id="elementos" data-module="modulo-astrologia" data-tab="elementos" style="background:linear-gradient(180deg,var(--abyss) 0%,rgba(10,5,25,.95) 100%)">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="elem-grid rv">
+      <div class="ec fuego" onclick="activElem(this)"><span class="ec-icon">🔥</span><h3 class="ec-name">Fuego</h3><span class="ec-sign">Aries · Leo · Sagitario</span><p class="ec-desc">La chispa de la creación, la voluntad de transformar, el coraje de comenzar.</p><div style="margin-top:1rem"><span class="tag">Acción</span><span class="tag">Pasión</span><span class="tag">Propósito</span></div></div>
+      <div class="ec tierra" onclick="activElem(this)"><span class="ec-icon">🌿</span><h3 class="ec-name">Tierra</h3><span class="ec-sign">Tauro · Virgo · Capricornio</span><p class="ec-desc">El cuerpo como templo, la abundancia como derecho sagrado, el arraigo.</p><div style="margin-top:1rem"><span class="tag">Abundancia</span><span class="tag">Cuerpo</span><span class="tag">Estabilidad</span></div></div>
+      <div class="ec aire" onclick="activElem(this)"><span class="ec-icon">🌬️</span><h3 class="ec-name">Aire</h3><span class="ec-sign">Géminis · Libra · Acuario</span><p class="ec-desc">La mente que trasciende, la palabra que crea realidades.</p><div style="margin-top:1rem"><span class="tag">Claridad</span><span class="tag">Palabra</span><span class="tag">Intuición</span></div></div>
+      <div class="ec agua" onclick="activElem(this)"><span class="ec-icon">🌊</span><h3 class="ec-name">Agua</h3><span class="ec-sign">Cáncer · Escorpio · Piscis</span><p class="ec-desc">El río de las emociones, la profundidad del inconsciente, la sanación.</p><div style="margin-top:1rem"><span class="tag">Emoción</span><span class="tag">Intuición</span><span class="tag">Sanación</span></div></div>
+    </div>
+  </div></div>
+
+
+  <div class="back-row"><a href="#hero" class="btn-back">↑ Volver al inicio</a></div>
+</section>
+
+<!-- ============ MODULO: CHAMANISMO ============ -->
+<section id="modulo-chamanismo" class="module-section" style="background:linear-gradient(180deg,var(--abyss) 0%,rgba(18,10,46,.7) 50%,var(--abyss) 100%)">
+  <div class="divider"></div>
+  <p class="eyebrow">Sabiduría Ancestral</p>
+  <h2 class="sec-title rv"><em>Chamanismo</em></h2>
+  <p class="sec-sub rv">Camina junto a tu animal de poder y las iniciaciones sagradas del Munay-Ki</p>
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="animales-poder" onclick="activateTab('modulo-chamanismo','animales-poder')">🐆 Animales de Poder</button>
+    <button class="tab-btn" data-tab="munay-ki" onclick="activateTab('modulo-chamanismo','munay-ki')">🏔️ Guardianes de la Tierra: Munay-Ki</button>
+  </div>
+  <!-- ANIMALES DE PODER -->
+<div class="tab-panel active" id="animales-poder" data-module="modulo-chamanismo" data-tab="animales-poder">
+  <div class="info-block rv">
+    <span class="info-icon">🐆</span>
+    <h3>Tu Aliado del Mundo Espiritual</h3>
+    <p>En la cosmovisión chamánica —descrita por el antropólogo Michael Harner tras estudiar tradiciones de Siberia, Norteamérica y la Amazonía— existen tres mundos: el superior, el intermedio (donde vivimos) y el inferior, habitado por los ancestros y los <strong>animales de poder</strong>. Cada persona tiene uno o varios espíritus guardianes que le prestan su "medicina": fuerza, sigilo, visión o protección.</p>
+    <p>Para encontrarlo se realiza un viaje chamánico guiado por el ritmo constante del tambor, que induce un estado de conciencia ampliada. En ese viaje se desciende al mundo inferior a través de una entrada simbólica —una cueva, un túnel, un río— y se espera con el corazón abierto, sin forzar la imagen: el animal que aparece de forma recurrente, tres o cuatro veces, es el que se reconoce como propio.</p>
+    <div class="info-grid">
+      <div class="ig-item"><h4>🦅 Cóndor / Águila</h4><p>Visión superior, perspectiva y conexión con lo espiritual.</p></div>
+      <div class="ig-item"><h4>🐆 Jaguar</h4><p>Transformación, poder personal y guardián del inframundo.</p></div>
+      <div class="ig-item"><h4>🐍 Serpiente</h4><p>Renovación: la capacidad de mudar de piel y renacer.</p></div>
+      <div class="ig-item"><h4>🐻 Oso</h4><p>Fuerza, protección e introspección sanadora.</p></div>
+    </div>
+    <button class="info-cta" onclick="openModal('animales')">✦ Descubrir mi Animal de Poder ✦</button>
+  </div>
+</div>
+
+  <!-- MUNAY-KI -->
+<div class="tab-panel" id="munay-ki" data-module="modulo-chamanismo" data-tab="munay-ki">
+  <div class="info-block rv">
+    <span class="info-icon">🏔️</span>
+    <h3>Guardianes de la Tierra: los 9 Ritos del Munay-Ki</h3>
+    <p><em>Munay</em> significa, en quechua, "te amo" o "el poder del amor". El Munay-Ki es un sistema de sanación e iniciación energética que nace de las prácticas de los chamanes Q'ero — descendientes de los Incas — de la región andina y amazónica del Perú, y que el antropólogo Alberto Villoldo trajo a Occidente tras más de 25 años de estudio junto a estos maestros.</p>
+    <p>A diferencia del Tarot, que es una herramienta de diagnóstico y reflexión, el Munay-Ki es un sistema de <strong>transmisión directa de energía</strong>: 9 iniciaciones que limpian el campo energético luminoso de traumas y patrones pasados, elevando la vibración de quien las recibe hacia lo que las profecías andinas llaman el <em>Homo Luminous</em>.</p>
+
+    <div style="text-align:left;max-width:640px;margin:2rem auto 0">
+      <p style="font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gd);margin-bottom:.8rem">Ritos Fundacionales</p>
+      <div class="info-grid">
+        <div class="ig-item"><h4>Rito del Sanador</h4><p>Despierta el poder curativo en las manos, conectando con linajes de sanadores del pasado.</p></div>
+        <div class="ig-item"><h4>Rito de las Bandas de Poder</h4><p>Instala cinco bandas energéticas que filtran y transmutan energía negativa en nutritiva.</p></div>
+        <div class="ig-item"><h4>Rito de la Armonía</h4><p>Transmite siete arquetipos a los chakras (Serpiente, Jaguar, Colibrí, Cóndor...) para soltar el pasado.</p></div>
+        <div class="ig-item"><h4>Rito del Vidente</h4><p>Conecta la visión con el tercer ojo y el corazón, despertando la percepción energética.</p></div>
+      </div>
+      <p style="font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gd);margin:1.8rem 0 .8rem">Ritos de Linaje</p>
+      <div class="info-grid">
+        <div class="ig-item"><h4>Guardián del Día</h4><p>Conecta con los maestros de los antiguos altares de piedra; honra la energía femenina y sana el miedo.</p></div>
+        <div class="ig-item"><h4>Guardián de la Sabiduría</h4><p>Conecta con las enseñanzas que residen en las altas montañas nevadas.</p></div>
+        <div class="ig-item"><h4>Guardián de la Tierra</h4><p>Conecta con los guardianes de nuestra galaxia y enseña a "soñar el mundo" para que se manifieste.</p></div>
+      </div>
+      <p style="font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gd);margin:1.8rem 0 .8rem">Ritos para los Tiempos Venideros</p>
+      <div class="info-grid">
+        <div class="ig-item"><h4>Guardián de las Estrellas</h4><p>Ancla al iniciado en la línea de tiempo del gran cambio evolutivo del ser humano.</p></div>
+        <div class="ig-item"><h4>Rito del Creador</h4><p>Despierta la luz de la creación interior y el sentido de responsabilidad por todo lo que existe.</p></div>
+      </div>
+    </div>
+
+    <p style="margin-top:2rem">El Tarot muestra el mapa donde estás bloqueado; el Munay-Ki entrega la energía para recorrerlo sin miedo. Muchas de nuestras sesiones combinan una lectura de Tarot con la aplicación de un rito específico para estabilizar el campo energético.</p>
+    <button class="info-cta" onclick="openModal('munay')">✦ Agendar Iniciación Munay-Ki ✦</button>
+  </div>
+</div>
+
+  <div class="back-row"><a href="#hero" class="btn-back">↑ Volver al inicio</a></div>
+</section>
+<!-- REGISTROS AKÁSICOS -->
+<section id="modulo-akashicos" class="module-section" style="background:linear-gradient(180deg,var(--abyss) 0%,var(--dp) 50%,var(--abyss) 100%)">
+  <div class="divider"></div>
+  <p class="eyebrow">La Biblioteca del Alma</p>
+  <h2 class="sec-title rv">Registros <em>Akásicos</em></h2>
+  <p class="sec-sub rv">Todo lo que tu alma ha vivido, y todo lo que vino a vivir, está escrito ahí</p>
+  <div class="info-block rv">
+    <span class="info-icon">📖</span>
+    <p><em>Akasha</em> es una palabra sánscrita que significa "éter" o "espacio ilimitado". Según la tradición esotérica —difundida a fines del siglo XIX por la Sociedad Teosófica de Helena Blavatsky y popularizada después por el médium Edgar Cayce, quien los llamaba el "Libro de la Vida"— los Registros Akásicos son un campo de memoria universal donde queda grabada cada acción, pensamiento y emoción de cada alma, a lo largo de todas sus vidas.</p>
+    <p>Una lectura de Registros Akásicos abre un espacio de conexión con esa memoria para revelar patrones kármicos, contratos del alma, vidas pasadas relevantes para tu presente y el propósito con el que elegiste esta encarnación. No es un oráculo que predice el futuro: es una fuente de información para tu crecimiento, que ilumina el porqué de lo que ya estás viviendo.</p>
+    <div class="info-grid">
+      <div class="ig-item"><h4>🌀 Patrones Kármicos</h4><p>Ciclos que se repiten en tus relaciones, trabajo o salud.</p></div>
+      <div class="ig-item"><h4>📜 Contratos del Alma</h4><p>Acuerdos hechos antes de nacer con personas clave de tu vida.</p></div>
+      <div class="ig-item"><h4>🕯️ Vidas Pasadas</h4><p>Memorias que aún influyen en miedos, talentos o dones actuales.</p></div>
+      <div class="ig-item"><h4>🧭 Propósito del Alma</h4><p>La misión con la que elegiste encarnar en esta vida.</p></div>
+    </div>
+    <button class="info-cta" onclick="openModal('akashicos')">✦ Agendar Lectura Akásica ✦</button>
+  </div>
+  <div class="back-row"><a href="#hero" class="btn-back">↑ Volver al inicio</a></div>
+</section>
+
+<!-- ============ MODULO: ESPACIO DE SANACION ============ -->
+<section id="modulo-sanacion" class="module-section" style="background:linear-gradient(180deg,var(--abyss) 0%,rgba(10,5,30,.9) 100%)">
+  <div class="divider"></div>
+  <p class="eyebrow">Terapias Energéticas</p>
+  <h2 class="sec-title rv">Dentro del Espacio de <em>Sanación</em></h2>
+  <p class="sec-sub rv">Herramientas y sesiones para diagnosticar, limpiar y elevar tu campo energético</p>
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="chakras" onclick="activateTab('modulo-sanacion','chakras')">7 Chakras</button>
+    <button class="tab-btn" data-tab="pendulo" onclick="activateTab('modulo-sanacion','pendulo')">Péndulo</button>
+    <button class="tab-btn" data-tab="sanacion-pleyadiana" onclick="activateTab('modulo-sanacion','sanacion-pleyadiana')">Sanación Pleyadiana</button>
+    <button class="tab-btn" data-tab="informe-alma" onclick="activateTab('modulo-sanacion','informe-alma')">Informe del Alma</button>
+    <button class="tab-btn" data-tab="bloqueos-energeticos" onclick="activateTab('modulo-sanacion','bloqueos-energeticos')">Bloqueos Energéticos</button>
+    <button class="tab-btn" data-tab="psicogenealogia" onclick="activateTab('modulo-sanacion','psicogenealogia')">Psicogenealogía</button>
+    <button class="tab-btn" data-tab="activacion-kundalini" onclick="activateTab('modulo-sanacion','activacion-kundalini')">Activación Kundalini</button>
+    <button class="tab-btn" data-tab="altar" onclick="activateTab('modulo-sanacion','altar')">🔥 Altar de Fuego</button>
+  </div>
+  <!-- CHAKRAS -->
+<div class="tab-panel active" id="chakras" data-module="modulo-sanacion" data-tab="chakras" style="background:linear-gradient(180deg,var(--abyss) 0%,rgba(10,5,30,.9) 100%)">
+  <div style="max-width:1060px;margin:0 auto">
+    <!-- AUTODIAGNÓSTICO -->
+    <div class="ch-diag rv">
+      <div class="ch-diag-q">
+        <strong>¿Qué sientes en este momento?</strong>
+        Elige hasta 3 estados que resuenen contigo ahora mismo
+      </div>
+      <div class="ch-diag-tags" id="ch-diag-tags">
+        <span class="ch-dtag" data-chakras="0">Ansiedad</span>
+        <span class="ch-dtag" data-chakras="0">Inseguridad</span>
+        <span class="ch-dtag" data-chakras="1">Bloqueo creativo</span>
+        <span class="ch-dtag" data-chakras="1">Falta de placer</span>
+        <span class="ch-dtag" data-chakras="2">Falta de voluntad</span>
+        <span class="ch-dtag" data-chakras="2">Baja autoestima</span>
+        <span class="ch-dtag" data-chakras="3">Dificultad para amar</span>
+        <span class="ch-dtag" data-chakras="3">Resentimiento</span>
+        <span class="ch-dtag" data-chakras="4">No poder expresarme</span>
+        <span class="ch-dtag" data-chakras="4">Miedo a hablar</span>
+        <span class="ch-dtag" data-chakras="5">Confusión mental</span>
+        <span class="ch-dtag" data-chakras="5">Falta de intuición</span>
+        <span class="ch-dtag" data-chakras="6">Desconexión espiritual</span>
+        <span class="ch-dtag" data-chakras="6">Falta de propósito</span>
+      </div>
+      <p class="ch-diag-hint" id="ch-diag-hint">0 / 3 seleccionados</p>
+      <button class="ch-diag-btn" id="ch-diag-btn" onclick="runDiag()">✦ Revelar mi Estado Energético ✦</button>
+    </div>
+
+    <!-- MAPA CORPORAL + TARJETAS -->
+    <div class="ch-layout rv">
+      <div class="ch-col" id="ch-col-left">
+        <div class="chi" data-chi="6" onclick="openChakra(6)"><div class="chi-dot" style="background:#9B59B6;box-shadow:0 0 8px #9B59B6"></div><span class="chi-sk">Sahasrara</span><h4 class="chi-name">Coronilla</h4><p class="chi-desc">Conexión con lo divino y la conciencia expandida</p></div>
+        <div class="chi" data-chi="5" onclick="openChakra(5)"><div class="chi-dot" style="background:#6C5CE7;box-shadow:0 0 8px #6C5CE7"></div><span class="chi-sk">Ajna</span><h4 class="chi-name">Tercer Ojo</h4><p class="chi-desc">Intuición, visión interior y clarividencia</p></div>
+        <div class="chi" data-chi="4" onclick="openChakra(4)"><div class="chi-dot" style="background:#00B4D8;box-shadow:0 0 8px #00B4D8"></div><span class="chi-sk">Vishuddha</span><h4 class="chi-name">Garganta</h4><p class="chi-desc">Expresión auténtica y comunicación sagrada</p></div>
+      </div>
+      <div class="ch-canvas-wrap">
+        <canvas id="ch-canvas" width="270" height="520"></canvas>
+        <div class="ch-hover-lbl" id="ch-hover-lbl"></div>
+      </div>
+      <div class="ch-col" id="ch-col-right">
+        <div class="chi" data-chi="3" onclick="openChakra(3)"><div class="chi-dot" style="background:#27AE60;box-shadow:0 0 8px #27AE60"></div><span class="chi-sk">Anahata</span><h4 class="chi-name">Corazón</h4><p class="chi-desc">Amor incondicional, compasión y sanación emocional</p></div>
+        <div class="chi" data-chi="2" onclick="openChakra(2)"><div class="chi-dot" style="background:#F39C12;box-shadow:0 0 8px #F39C12"></div><span class="chi-sk">Manipura</span><h4 class="chi-name">Plexo Solar</h4><p class="chi-desc">Poder personal, autoestima y voluntad creativa</p></div>
+        <div class="chi" data-chi="1" onclick="openChakra(1)"><div class="chi-dot" style="background:#E67E22;box-shadow:0 0 8px #E67E22"></div><span class="chi-sk">Svadhisthana</span><h4 class="chi-name">Sacro</h4><p class="chi-desc">Creatividad, sexualidad sagrada y flujo emocional</p></div>
+        <div class="chi" data-chi="0" onclick="openChakra(0)"><div class="chi-dot" style="background:#E74C3C;box-shadow:0 0 8px #E74C3C"></div><span class="chi-sk">Muladhara</span><h4 class="chi-name">Raíz</h4><p class="chi-desc">Seguridad, arraigo y conexión con la tierra</p></div>
+      </div>
+    </div>
+
+    <!-- PANEL DE DETALLE + HERRAMIENTAS -->
+    <div class="ch-detail" id="ch-detail">
+      <div class="ch-detail-header">
+        <div class="ch-detail-orb" id="ch-det-orb"></div>
+        <div class="ch-detail-hinfo">
+          <span class="ch-detail-sk" id="ch-det-sk"></span>
+          <div class="ch-detail-name" id="ch-det-name"></div>
+        </div>
+        <button class="ch-detail-close" onclick="closeChakra()">✕</button>
+      </div>
+      <div class="ch-detail-body">
+        <div class="ch-detail-col">
+          <span class="ch-det-label">Esencia del centro</span>
+          <p class="ch-det-txt" id="ch-det-esencia"></p>
+          <span class="ch-det-label">Señales de desequilibrio</span>
+          <div id="ch-det-symptoms"></div>
+        </div>
+        <div class="ch-detail-col">
+          <span class="ch-det-label">Mantra · Afirmación</span>
+          <p class="ch-det-txt" id="ch-det-mantra" style="font-size:1rem;color:var(--gold)"></p>
+          <span class="ch-det-label">Elemento · Nota</span>
+          <p class="ch-det-txt" id="ch-det-elem"></p>
+          <span class="ch-det-label">Color · Frecuencia</span>
+          <p class="ch-det-txt" id="ch-det-color"></p>
+        </div>
+      </div>
+      <div class="ch-tools">
+        <span class="ch-tools-label">Herramientas de Sanación — elige una para ver la receta</span>
+        <div class="ch-tools-grid" id="ch-tools-grid"></div>
+      </div>
+      <div class="ch-recipe" id="ch-recipe">
+        <div class="ch-recipe-title" id="ch-recipe-title"></div>
+        <div class="ch-recipe-sub" id="ch-recipe-sub"></div>
+        <div class="ch-recipe-steps" id="ch-recipe-steps"></div>
+        <button class="ch-recipe-btn" onclick="openModal('pend')">✦ Agendar Sesión de Alineación ✦</button>
+      </div>
+    </div>
+  </div></div>
+
+
+  <!-- PENDULO -->
+<div class="tab-panel" id="pendulo" data-module="modulo-sanacion" data-tab="pendulo" style="background:linear-gradient(180deg,var(--abyss) 0%,rgba(18,10,46,.8) 50%,var(--abyss) 100%)">
+  <div class="pend-wrap rv">
+    <input class="pend-input" id="pend-q" placeholder="Escribe tu pregunta aquí...">
+    <canvas id="pend-canvas" width="460" height="340"></canvas>
+    <div class="pend-ans"><p id="pend-ans">— — —</p></div>
+    <button class="pend-btn" onclick="consultPend()">✦ Consultar el Péndulo ✦</button>
+  </div></div>
+
+
+  <!-- SANACIÓN PLEYADIANA -->
+<div class="tab-panel" id="sanacion-pleyadiana" data-module="modulo-sanacion" data-tab="sanacion-pleyadiana">
+  <div class="info-block rv">
+    <span class="info-icon">✨</span>
+    <h3>Códigos de Luz de las Pléyades</h3>
+    <p>La Sanación Pleyadiana es una terapia energética que combina cuarzos, geometría sagrada y "códigos de luz" canalizados, asociados a la frecuencia del cúmulo estelar de las Pléyades. Se trabaja sobre el campo áurico, colocando símbolos vibracionales sobre cada chakra para acompañar el equilibrio físico, emocional y espiritual.</p>
+    <p>Es una sanación suave y no invasiva, pensada como complemento — nunca sustituto — de tratamientos médicos o psicológicos. Muchas personas la buscan en procesos de transición, duelo, agotamiento energético o simplemente para sostener una sensación más profunda de calma y conexión.</p>
+    <button class="info-cta" onclick="openModal('pleyadiana')">✦ Agendar Sanación Pleyadiana ✦</button>
+  </div>
+</div>
+
+  <!-- INFORME DEL ALMA -->
+<div class="tab-panel" id="informe-alma" data-module="modulo-sanacion" data-tab="informe-alma">
+  <div class="info-block rv">
+    <span class="info-icon">🕊️</span>
+    <h3>Un Retrato Escrito de tu Esencia</h3>
+    <p>El Informe del Alma es una lectura personalizada — entregada de forma escrita y explicada en sesión — que reúne en un solo documento tu propósito de vida (la misión que tu alma trazó antes de encarnar), tus dones naturales, las memorias que llevas sin saber de dónde vienen y los bloqueos energéticos más profundos que este momento te pide liberar.</p>
+    <p>Se elabora combinando tu carta natal, un diagnóstico energético y una conexión intuitiva con tu campo, para entregarte un mapa claro y personal de quién eres y hacia dónde va tu alma en esta etapa. No es una solución mágica: es un punto de partida honesto para tu propio proceso.</p>
+    <button class="info-cta" onclick="openModal('alma')">✦ Solicitar mi Informe del Alma ✦</button>
+  </div>
+</div>
+
+  <!-- BLOQUEOS ENERGÉTICOS -->
+<div class="tab-panel" id="bloqueos-energeticos" data-module="modulo-sanacion" data-tab="bloqueos-energeticos">
+  <div class="info-block rv">
+    <span class="info-icon">🔓</span>
+    <h3>Cuando la Energía Deja de Fluir</h3>
+    <p>Un bloqueo energético es una acumulación de emoción no procesada — miedo, culpa, resentimiento, duelo — que se aloja en el campo áurico o en un chakra específico y se manifiesta como cansancio, estancamiento en proyectos, relaciones que se repiten o malestares recurrentes sin causa física clara.</p>
+    <p>En sesión se identifica dónde y por qué se originó el bloqueo —con frecuencia ayuda el autodiagnóstico de chakras de este mismo espacio— y se trabaja su liberación mediante limpieza energética, respiración consciente y, cuando corresponde, los ritos del Munay-Ki. Es un acompañamiento complementario, no un sustituto de atención médica o psicológica.</p>
+    <button class="info-cta" onclick="openModal('bloqueos')">✦ Agendar Limpieza Energética ✦</button>
+  </div>
+</div>
+
+  <!-- PSICOGENEALOGÍA -->
+<div class="tab-panel" id="psicogenealogia" data-module="modulo-sanacion" data-tab="psicogenealogia">
+  <div class="info-block rv">
+    <span class="info-icon">🌳</span>
+    <h3>Las Historias que Heredamos sin Saberlo</h3>
+    <p>La Psicogenealogía fue desarrollada por la psicóloga francesa Anne Ancelin Schützenberger, quien observó que los traumas, secretos y duelos no resueltos de nuestros ancestros no desaparecen: se transmiten de generación en generación a través de lo que ella llamó <strong>lealtades invisibles</strong> — compromisos inconscientes que nos llevan a repetir destinos, fracasos o sufrimientos por fidelidad silenciosa a nuestro linaje.</p>
+    <p>En sesión se reconstruye contigo un mapa emocional de tu árbol genealógico (el "genosociograma"), identificando patrones repetitivos, coincidencias de fechas entre generaciones y nudos transgeneracionales activos, para que puedas reconocerlos, honrarlos y dejar de cargar historias que no te pertenecen.</p>
+    <button class="info-cta" onclick="openModal('psicogenealogia')">✦ Agendar Sesión de Psicogenealogía ✦</button>
+  </div>
+</div>
+
+  <!-- ACTIVACIÓN KUNDALINI -->
+<div class="tab-panel" id="activacion-kundalini" data-module="modulo-sanacion" data-tab="activacion-kundalini">
+  <div class="info-block rv">
+    <span class="info-icon">🐍</span>
+    <h3>El Fuego Dormido en la Raíz</h3>
+    <p>En la tradición yóguica y tántrica, la Kundalini es una energía vital que descansa enroscada como una serpiente en el chakra raíz (Muladhara), en la base de la columna. Al activarse mediante respiración consciente (pranayama), mantra e intención guiada, asciende por el canal central —la sushumna— atravesando los siete chakras hasta el chakra corona, generando mayor claridad, vitalidad y conciencia.</p>
+    <p>Es un proceso que se guía con gradualidad y respeto: una activación intensa o sin acompañamiento puede generar sobrecarga emocional o física, por lo que cada sesión se adapta a tu momento personal, combinando respiración, sonido y visualización para integrar la energía de forma segura.</p>
+    <button class="info-cta" onclick="openModal('kundalini')">✦ Agendar Activación Kundalini ✦</button>
+  </div>
+</div>
+
+  <!-- ALTAR -->
+<div class="tab-panel" id="altar" data-module="modulo-sanacion" data-tab="altar" style="background:linear-gradient(180deg,var(--abyss) 0%,rgba(30,10,5,.9) 50%,var(--abyss) 100%)">
+  <div class="rv" style="text-align:center">
+    <canvas id="fire-canvas" width="680" height="180"></canvas>
+    <textarea class="altar-ta" id="altar-txt" placeholder="Escribo aquí lo que deseo liberar, sanar o transmutar..."></textarea>
+    <button class="altar-fire-btn" onclick="burnIt()">🔥 Entregar al Fuego Sagrado 🔥</button>
+    <p class="altar-msg" id="altar-msg">Ha sido entregado al fuego. Que la transmutación sea completa. ✨</p>
+  </div></div>
+
+
+  <div class="back-row"><a href="#hero" class="btn-back">↑ Volver al inicio</a></div>
+</section>
+<!-- SERVICIOS -->
+<section id="servicios" style="background:linear-gradient(180deg,var(--abyss) 0%,var(--dp) 100%)">
+  <div class="divider"></div>
+  <p class="eyebrow">Consultas con la Chamana</p>
+  <h2 class="sec-title rv">Agenda tu <em>Sesión</em></h2>
+  <p class="sec-sub rv">Sesiones únicas y personalizadas para acompañar tu camino de despertar</p>
+  <div class="serv-grid rv">
+    <div class="sc"><span class="sc-icon">🌙</span><h3 class="sc-title">Carta Natal + Tarot</h3><span class="sc-elem">☿ Aire · Mercurio</span><p class="sc-desc">Viaje profundo por tu mapa estelar combinado con los arquetipos del Tarot para revelar tu propósito de vida.</p><p class="sc-price">$90 <span>USD / 90 min</span></p><button class="btn-ag" onclick="openModal('carta')">Agendar</button></div>
+    <div class="sc"><span class="sc-icon">⚡</span><h3 class="sc-title">Alineación con Péndulo</h3><span class="sc-elem">🌊 Agua · Luna</span><p class="sc-desc">Diagnóstico completo del campo energético, limpieza y reequilibrio de los 7 chakras con péndulo cuántico.</p><p class="sc-price">$75 <span>USD / 60 min</span></p><button class="btn-ag" onclick="openModal('pend')">Agendar</button></div>
+    <div class="sc"><span class="sc-icon">🔥</span><h3 class="sc-title">Limpieza Chamánica</h3><span class="sc-elem">🔥 Fuego · Marte</span><p class="sc-desc">Ritual sagrado de limpieza profunda, extracción de energías densas y activación del fuego interior.</p><p class="sc-price">$110 <span>USD / 120 min</span></p><button class="btn-ag" onclick="openModal('limpieza')">Agendar</button></div>
+  </div>
+  <div class="back-row"><a href="#hero" class="btn-back">↑ Volver al inicio</a></div>
+</section>
+
+
+<!-- FOOTER -->
+<!-- FOOTER -->
+<footer>
+  <div class="f-logo">TA<em>-ROD</em></div>
+  <ul class="f-links">
+    <li><a href="#modulo-tarot">Tarot</a></li>
+    <li><a href="#modulo-astrologia">Astrología</a></li>
+    <li><a href="#modulo-chamanismo">Chamanismo</a></li>
+    <li><a href="#modulo-akashicos">Registros Akásicos</a></li>
+    <li><a href="#modulo-sanacion">Espacio de Sanación</a></li>
+    <li><a href="#servicios">Sesiones</a></li>
+  </ul>
+  <p class="f-copy">© 2026 TA-ROD · Con amor cósmico</p>
+</footer>
+
+<!-- MODAL AGENDAR -->
+<div class="modal-ov" id="modal-ov" onclick="if(event.target===this)closeModal()">
+  <div class="modal" style="max-width:560px;overflow-y:auto;max-height:92vh">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="m-title">Agendar Sesión</h3>
+    <p id="m-sub">Completa tus datos para reservar tu espacio sagrado</p>
+    <div class="modal-form">
+      <input type="text" id="m-nombre" placeholder="Tu nombre completo">
+      <input type="email" id="m-email" placeholder="Correo electrónico">
+      <input type="tel" id="m-wa" placeholder="WhatsApp (ej: 88215669)">
+      <select id="m-svc" style="color-scheme:dark">
+        <option value="">Tipo de sesión</option>
+        <option value="carta">Carta Natal + Tarot — $90 USD</option>
+        <option value="pend">Alineación con Péndulo — $75 USD</option>
+        <option value="limpieza">Limpieza Chamánica — $110 USD</option>
+        <option value="revolucion">Revolución Solar — $65 USD</option>
+        <option value="munay">Iniciación Munay-Ki — $95 USD</option>
+        <option value="animales">Animales de Poder — $70 USD</option>
+        <option value="akashicos">Lectura de Registros Akásicos — $85 USD</option>
+        <option value="pleyadiana">Sanación Pleyadiana — $80 USD</option>
+        <option value="alma">Informe del Alma — $95 USD</option>
+        <option value="bloqueos">Limpieza de Bloqueos Energéticos — $75 USD</option>
+        <option value="psicogenealogia">Psicogenealogía — $85 USD</option>
+        <option value="kundalini">Activación Kundalini — $90 USD</option>
+      </select>
+      <select id="m-mod" style="color-scheme:dark">
+        <option value="">Modalidad</option>
+        <option>Virtual (Zoom)</option>
+        <option>Presencial</option>
+      </select>
+      <!-- CALENDARIO -->
+      <div class="cal-wrap">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="calMove(-1)">‹</button>
+          <span class="cal-month-lbl" id="cal-month-lbl"></span>
+          <button class="cal-nav" onclick="calMove(1)">›</button>
+        </div>
+        <div class="cal-days-head">
+          <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span>
+          <span>Jue</span><span>Vie</span><span>Sáb</span>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-sel-row" id="cal-sel-row" style="display:none">
+          <span class="cal-sel-lbl" id="cal-sel-lbl"></span>
+          <div class="cal-slots" id="cal-slots"></div>
+        </div>
+      </div>
+      <div class="cal-chosen" id="cal-chosen" style="display:none">
+        <span id="cal-chosen-txt"></span>
+        <button class="cal-chosen-clear" onclick="clearCalSel()">✕</button>
+      </div>
+      <button class="modal-submit" onclick="confirmBook()">✦ Confirmar mi Reserva ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ARCANO -->
+<div id="am-overlay" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="am-modal">
+    <button class="am-close" onclick="document.getElementById('am-overlay').classList.remove('on')">✕</button>
+    <div class="am-art" id="am-art"></div>
+    <div class="am-body">
+      <h3 class="am-title" id="am-title"></h3>
+      <span class="am-kw" id="am-kw"></span>
+      <div class="am-badges" id="am-badges"></div>
+      <div class="am-sec"><h5>Significado en el Tarot de Marsella</h5><p id="am-marseille"></p></div>
+      <div class="am-sec"><h5>Lectura Chamánica</h5><p id="am-chamanico"></p></div>
+      <div class="am-sec"><h5>Cuando aparece en tu tirada</h5><p id="am-tirada"></p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════
+const TAB_MAP={};
+function registerTabs(){
+  document.querySelectorAll('.tab-panel').forEach(p=>{
+    if(p.dataset.module&&p.dataset.tab)TAB_MAP[p.id]={module:p.dataset.module,tab:p.id};
+  });
+}
+function activateTab(moduleId,tabId){
+  const mod=document.getElementById(moduleId);if(!mod)return;
+  mod.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  mod.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById(tabId);
+  if(panel){panel.classList.add('active');panel.querySelectorAll('.rv').forEach(el=>el.classList.add('on'))}
+  const btn=mod.querySelector('.tab-btn[data-tab="'+tabId+'"]');
+  if(btn)btn.classList.add('active');
+}
+function goTo(id){
+  const map=TAB_MAP[id];
+  if(map)activateTab(map.module,map.tab);
+  const el=document.getElementById(id);
+  if(el)el.scrollIntoView({behavior:'smooth'});
+}
+document.addEventListener('DOMContentLoaded',registerTabs);
+document.addEventListener('click',function(e){
+  const a=e.target.closest('a[href^="#"]');
+  if(!a)return;
+  const id=a.getAttribute('href').slice(1);
+  if(TAB_MAP[id]){e.preventDefault();goTo(id)}
+});
+function $(id){return document.getElementById(id)}
+
+// ═══════════════════════════════════════
+// CURSOR OM
+// ═══════════════════════════════════════
+const cur=$('cur'),curR=$('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function tick(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(tick)})();
+document.querySelectorAll('button,a,.ec,.chi,.arc-card,.dmc').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.fontSize='2rem';curR.style.width='56px';curR.style.height='56px'});
+  el.addEventListener('mouseleave',()=>{cur.style.fontSize='1.3rem';curR.style.width='38px';curR.style.height='38px'});
+});
+
+// ═══════════════════════════════════════
+// NAV SCROLL
+// ═══════════════════════════════════════
+window.addEventListener('scroll',()=>$('main-nav').classList.toggle('sc',scrollY>50));
+
+// ═══════════════════════════════════════
+// BACKGROUND: CONSTELLATIONS + SHOOTING STARS
+// ═══════════════════════════════════════
+const bgC=$('bg-canvas'),bgX=bgC.getContext('2d');
+// Zodiac constellations — unit coords (0-1)
+const CONS=[
+  {name:'♈ Aries',   col:'rgba(255,130,70,', stars:[{x:.50,y:.38},{x:.53,y:.42},{x:.57,y:.44},{x:.60,y:.40}], lines:[[0,1],[1,2],[2,3]]},
+  {name:'♉ Tauro',   col:'rgba(150,210,100,',stars:[{x:.12,y:.55},{x:.16,y:.52},{x:.19,y:.50},{x:.22,y:.52},{x:.18,y:.47},{x:.24,y:.48},{x:.21,y:.44}],lines:[[0,1],[1,2],[2,3],[2,4],[4,5],[4,6]]},
+  {name:'♊ Géminis', col:'rgba(100,190,255,',stars:[{x:.72,y:.18},{x:.75,y:.22},{x:.78,y:.26},{x:.80,y:.18},{x:.83,y:.23},{x:.86,y:.28}],lines:[[0,1],[1,2],[3,4],[4,5],[1,4]]},
+  {name:'♋ Cáncer',  col:'rgba(160,160,255,',stars:[{x:.30,y:.20},{x:.33,y:.24},{x:.37,y:.22},{x:.34,y:.28}],lines:[[0,1],[1,2],[1,3]]},
+  {name:'♌ Leo',     col:'rgba(255,195,50,', stars:[{x:.62,y:.30},{x:.65,y:.27},{x:.68,y:.25},{x:.71,y:.28},{x:.70,y:.33},{x:.66,y:.36},{x:.63,y:.33},{x:.68,y:.39}],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[4,7]]},
+  {name:'♍ Virgo',   col:'rgba(120,210,140,',stars:[{x:.85,y:.48},{x:.88,y:.44},{x:.90,y:.40},{x:.92,y:.45},{x:.89,y:.50},{x:.86,y:.55},{x:.90,y:.57}],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[4,6]]},
+  {name:'♎ Libra',   col:'rgba(190,140,255,',stars:[{x:.20,y:.73},{x:.24,y:.68},{x:.28,y:.65},{x:.26,y:.73},{x:.22,y:.77}],lines:[[0,1],[1,2],[2,3],[3,4],[4,0],[1,3]]},
+  {name:'♏ Escorpio',col:'rgba(255,75,75,',  stars:[{x:.45,y:.60},{x:.48,y:.63},{x:.52,y:.65},{x:.55,y:.62},{x:.57,y:.58},{x:.60,y:.62},{x:.63,y:.66},{x:.61,y:.71},{x:.57,y:.73}],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8]]},
+  {name:'♐ Sagitario',col:'rgba(255,155,55,',stars:[{x:.75,y:.68},{x:.78,y:.64},{x:.82,y:.62},{x:.85,y:.66},{x:.83,y:.72},{x:.80,y:.76},{x:.77,y:.73}],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0],[1,3]]},
+  {name:'♑ Capricornio',col:'rgba(140,195,165,',stars:[{x:.08,y:.30},{x:.11,y:.27},{x:.14,y:.25},{x:.17,y:.28},{x:.15,y:.33},{x:.11,y:.35}],lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]},
+  {name:'♒ Acuario', col:'rgba(80,195,255,', stars:[{x:.38,y:.79},{x:.42,y:.75},{x:.46,y:.77},{x:.50,y:.73},{x:.53,y:.75},{x:.44,y:.81},{x:.48,y:.83}],lines:[[0,1],[1,2],[2,3],[3,4],[1,5],[5,6],[6,3]]},
+  {name:'♓ Piscis',  col:'rgba(150,150,255,',stars:[{x:.65,y:.80},{x:.68,y:.76},{x:.71,y:.80},{x:.70,y:.85},{x:.74,y:.82},{x:.77,y:.78},{x:.75,y:.84}],lines:[[0,1],[1,2],[2,3],[4,5],[5,6],[6,4],[2,4]]}
+];
+let bgStars=[],cstates=[],shoots=[],shootT=0,bgT=0;
+const cstateInit=()=>CONS.map((_,i)=>({a:0,ta:0,ph:Math.random()*6.28,sp:.0003+Math.random()*.0002,
+  next:i*3500+Math.random()*7000,vis:false,dx:(Math.random()-.5)*.0018,dy:(Math.random()-.5)*.001,ox:0,oy:0}));
+function initBG(){
+  bgC.width=innerWidth;bgC.height=innerHeight;
+  bgStars=Array.from({length:200},()=>({x:Math.random()*bgC.width,y:Math.random()*bgC.height,
+    r:Math.random()*1.1+.2,a:Math.random()*.4+.05,sp:Math.random()*.0014+.0004,ph:Math.random()*6.28}));
+  cstates=cstateInit();
+}
+function spawnShoot(){
+  const W=bgC.width,H=bgC.height,left=Math.random()>.5;
+  const x=left?Math.random()*W*.35:W*.65+Math.random()*W*.35;
+  const spd=9+Math.random()*9;
+  const ang=.3+Math.random()*.2;
+  shoots.push({x,y:Math.random()*H*.35,vx:Math.cos(ang)*spd*(left?1:-1),
+    vy:Math.sin(ang)*spd+2,life:1,decay:.02+Math.random()*.015,tail:[]});
+}
+function animBG(t){
+  bgT++;
+  bgC.width=bgC.width; // clear
+  bgX.clearRect(0,0,bgC.width,bgC.height);
+  const W=bgC.width,H=bgC.height,now=performance.now();
+  // bg stars
+  bgStars.forEach(s=>{const a=s.a*(.5+.5*Math.sin(t*s.sp*1000+s.ph));bgX.beginPath();bgX.arc(s.x,s.y,s.r,0,6.28);bgX.fillStyle='rgba(215,200,160,'+a+')';bgX.fill()});
+  // constellations
+  CONS.forEach((c,ci)=>{
+    const st=cstates[ci];
+    if(now>st.next){st.vis=!st.vis;st.ta=st.vis?(.10+Math.random()*.09):0;st.next=now+(st.vis?9000+Math.random()*11000:4000+Math.random()*6000)}
+    st.a+=(st.ta-st.a)*.007;
+    if(st.a<.003)return;
+    st.ox+=st.dx;st.oy+=st.dy;
+    if(Math.abs(st.ox)>.014)st.dx*=-1;if(Math.abs(st.oy)>.007)st.dy*=-1;
+    const ox=st.ox*W,oy=st.oy*H,a=st.a*(1+.06*Math.sin(t*st.sp*1000+st.ph));
+    // lines
+    bgX.strokeStyle=c.col+(a*.55)+')';bgX.lineWidth=.7;
+    c.lines.forEach(([i1,i2])=>{const s1=c.stars[i1],s2=c.stars[i2];bgX.beginPath();bgX.moveTo(s1.x*W+ox,s1.y*H+oy);bgX.lineTo(s2.x*W+ox,s2.y*H+oy);bgX.stroke()});
+    // stars
+    c.stars.forEach((s,si)=>{
+      const sx=s.x*W+ox,sy=s.y*H+oy,sz=si===0?2.1:1.4,sa=a*(si===0?1:.85);
+      const g=bgX.createRadialGradient(sx,sy,0,sx,sy,sz*4);
+      g.addColorStop(0,c.col+(sa*.55)+')');g.addColorStop(1,'transparent');
+      bgX.fillStyle=g;bgX.beginPath();bgX.arc(sx,sy,sz*4,0,6.28);bgX.fill();
+      bgX.beginPath();bgX.arc(sx,sy,sz,0,6.28);bgX.fillStyle=c.col+Math.min(1,sa*1.2)+')';bgX.fill();
+    });
+    if(a>.07){const cx=c.stars.reduce((s,st)=>s+st.x,0)/c.stars.length*W+ox,cy=Math.min(...c.stars.map(s=>s.y))*H+oy-10;bgX.font='9px serif';bgX.fillStyle=c.col+(a*.7)+')';bgX.textAlign='center';bgX.fillText(c.name,cx,cy)}
+  });
+  // shooting stars
+  if(bgT>shootT){spawnShoot();shootT=bgT+180+Math.floor(Math.random()*360)}
+  shoots=shoots.filter(s=>s.life>0);
+  shoots.forEach(s=>{
+    s.x+=s.vx;s.y+=s.vy;s.life-=s.decay;
+    s.tail.unshift({x:s.x,y:s.y,l:s.life});if(s.tail.length>16)s.tail.pop();
+    s.tail.forEach((p,i)=>{const pr=1-i/s.tail.length,al=p.l*pr*.85;bgX.beginPath();bgX.arc(p.x,p.y,pr*1.4,0,6.28);bgX.fillStyle='rgba(215,205,255,'+al+')';bgX.fill()});
+    if(s.life>.1){const g=bgX.createRadialGradient(s.x,s.y,0,s.x,s.y,6);g.addColorStop(0,'rgba(255,255,255,'+(s.life*.9)+')');g.addColorStop(.4,'rgba(190,180,255,'+(s.life*.5)+')');g.addColorStop(1,'transparent');bgX.fillStyle=g;bgX.beginPath();bgX.arc(s.x,s.y,6,0,6.28);bgX.fill()}
+  });
+  requestAnimationFrame(animBG);
+}
+window.addEventListener('resize',initBG);
+initBG();
+requestAnimationFrame(animBG);
+
+// ═══════════════════════════════════════
+// ZODIAC HERO CANVAS
+// ═══════════════════════════════════════
+const zC=$('zodiac-canvas'),zX=zC.getContext('2d');
+const ZG=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+const TN=['0','I','II','III','IV','V','VI','VII','VIII','IX','X','XI'];
+const ZPL=[{s:'☉',sp:.006,r:.17,ph:0},{s:'☽',sp:.014,r:.13,ph:1.1},{s:'♂',sp:.004,r:.22,ph:2.5},{s:'♀',sp:.009,r:.10,ph:4},{s:'♃',sp:.003,r:.27,ph:.8},{s:'♄',sp:.002,r:.31,ph:3.3}];
+const zSt=Array.from({length:70},()=>({x:Math.random()*600,y:Math.random()*600,r:Math.random()*1.1+.3,a:Math.random()*.35+.05,tw:Math.random()*6.28,sp:Math.random()*.014+.003}));
+let zA=0,zT=0,zMx=0,zMy=0;
+document.addEventListener('mousemove',e=>{const r=zC.getBoundingClientRect();zMx=(e.clientX-r.left-300)/300;zMy=(e.clientY-r.top-300)/300});
+function drawZodiac(){
+  zA+=.0011;zT++;
+  const W=600,H=600,cx=300,cy=300;
+  zX.clearRect(0,0,W,H);
+  const Ro=278,Rz=253,Rm=226,Rh=198,Ri=172,Rp=152;
+  zSt.forEach(s=>{s.tw+=s.sp;const a=s.a*(.5+.5*Math.sin(s.tw));zX.beginPath();zX.arc(s.x,s.y,s.r,0,6.28);zX.fillStyle='rgba(215,195,155,'+a+')';zX.fill()});
+  [[Ro,.28,.9],[Rz,.09,.5],[Rm,.11,.5],[Rh,.07,.4],[Ri,.06,.4]].forEach(([r,a,lw])=>{zX.beginPath();zX.arc(cx,cy,r,0,6.28);zX.strokeStyle='rgba(201,168,76,'+a+')';zX.lineWidth=lw;zX.stroke()});
+  for(let i=0;i<12;i++){
+    const ang=(i/12)*6.28+zA*.1,ic=i%3===0;
+    zX.beginPath();zX.moveTo(cx+Math.cos(ang)*Ri,cy+Math.sin(ang)*Ri);zX.lineTo(cx+Math.cos(ang)*Ro,cy+Math.sin(ang)*Ro);
+    zX.strokeStyle=ic?'rgba(201,168,76,.28)':'rgba(201,168,76,.10)';zX.lineWidth=ic?.8:.4;zX.stroke();
+    const ma=((i+.5)/12)*6.28+zA*.1,tx=cx+Math.cos(ma)*((Ri+Rh)/2),ty=cy+Math.sin(ma)*((Ri+Rh)/2);
+    zX.font='11px serif';zX.fillStyle='rgba(201,168,76,.38)';zX.textAlign='center';zX.textBaseline='middle';zX.fillText(TN[i],tx,ty);
+  }
+  ZG.forEach((g,i)=>{
+    const ang=(i/12)*6.28+zA*.1+zMx*.022,px=cx+Math.cos(ang)*((Rz+Ro)/2),py=cy+Math.sin(ang)*((Rz+Ro)/2);
+    const p=.42+.16*Math.sin(zT*.017+i*.52);
+    zX.font='bold 16px serif';zX.fillStyle='rgba(230,210,160,'+p+')';zX.textAlign='center';zX.textBaseline='middle';zX.fillText(g,px,py);
+  });
+  [[3,'rgba(175,110,255,.07)',.5],[4,'rgba(201,168,76,.055)',.4],[6,'rgba(90,155,255,.05)',.3]].forEach(([n,col,lw])=>{
+    zX.beginPath();
+    for(let i=0;i<n;i++){const a=(i/n)*6.28+zA*.3,px=cx+Math.cos(a)*Ri,py=cy+Math.sin(a)*Ri;i===0?zX.moveTo(px,py):zX.lineTo(px,py)}
+    zX.closePath();zX.strokeStyle=col;zX.lineWidth=lw;zX.stroke();
+  });
+  ZPL.forEach(p=>{
+    const ang=zA*(p.sp/.0011)+p.ph+zMy*.02,orR=p.r*Rp,px=cx+Math.cos(ang)*orR,py=cy+Math.sin(ang)*orR;
+    zX.beginPath();zX.arc(cx,cy,orR,0,6.28);zX.strokeStyle='rgba(201,168,76,.04)';zX.lineWidth=.4;zX.stroke();
+    zX.font='13px serif';zX.fillStyle='rgba(230,210,160,.52)';zX.textAlign='center';zX.textBaseline='middle';zX.fillText(p.s,px,py);
+  });
+  const cg=zX.createRadialGradient(cx,cy,0,cx,cy,75);cg.addColorStop(0,'rgba(95,45,190,.12)');cg.addColorStop(.5,'rgba(55,18,115,.06)');cg.addColorStop(1,'transparent');
+  zX.fillStyle=cg;zX.beginPath();zX.arc(cx,cy,75,0,6.28);zX.fill();
+  requestAnimationFrame(drawZodiac);
+}
+requestAnimationFrame(drawZodiac);
+
+// ═══════════════════════════════════════
+// ESOTERIC SYMBOLS BG
+// ═══════════════════════════════════════
+(function(){
+  const layer=$('sketch-layer');
+  const syms=['ॐ','☯','✡','⛤','☽','☾','☀','♄','♃','♂','♀','☿','♆','♇','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','⊕','△','▽','◇','☥','Ψ','Ω','Φ','⚗','✦','✧'];
+  const cols=8,rows=13;
+  const cw=100/cols,ch=100/rows;
+  let idx=0;
+  for(let row=0;row<rows;row++)for(let col=0;col<cols;col++){
+    if(Math.random()<.28)continue;
+    const d=document.createElement('div');d.className='sk';
+    const left=(col*cw+Math.random()*cw*.8+cw*.1).toFixed(2);
+    const top=(row*ch+Math.random()*ch*.8+ch*.1).toFixed(2);
+    const size=(28+Math.random()*55).toFixed(0);
+    const rot=((Math.random()*40)-20).toFixed(1);
+    const dur=(14+Math.random()*15).toFixed(1);
+    const del=(Math.random()*-20).toFixed(1);
+    const opLo=(Math.random()*.035+.015).toFixed(3);
+    const opHi=(Math.random()*.065+.045).toFixed(3);
+    d.textContent=syms[(idx++)%syms.length];
+    d.style.cssText='left:'+left+'%;top:'+top+'%;font-size:'+size+'px;--r:'+rot+'deg;--dur:'+dur+'s;--del:'+del+'s;animation-delay:'+del+'s;opacity:'+opLo;
+    layer.appendChild(d);
+  }
+})();
+
+// ═══════════════════════════════════════
+// CARTA NATAL — Rueda Profesional + Aspectos + Descarga
+// ═══════════════════════════════════════
+let cartaShowLines=true,cartaData=null;
+
+const PLANET_TIPS_MAP={
+  '☉':{'Aries':'Tu Sol en Aries te lanza al mundo como pionero. Llevas el fuego iniciático: eres el arquetipo del guerrero espiritual.','Tauro':'Tu Sol en Tauro ancla tu ser en la abundancia sensorial. Manifiestas con paciencia y construyes legados duraderos.','Géminis':'Tu Sol en Géminis es un caleidoscopio mental. La dualidad es tu danza: el mensajero entre mundos.','Cáncer':'Tu Sol en Cáncer brilla desde la profundidad emocional. Eres el guardian del alma, sanador de linajes.','Leo':'Tu Sol en Leo irradia creatividad magnética y liderazgo del corazón. Estás aquí para brillar auténticamente.','Virgo':'Tu Sol en Virgo destila sabiduría práctica. Eres el alquimista que transforma lo cotidiano en sagrado.','Libra':'Tu Sol en Libra busca la armonía cósmica. Eres el maestro del equilibrio entre las polaridades.','Escorpio':'Tu Sol en Escorpio penetra los misterios más profundos. Renaces de tus propias cenizas con poder renovado.','Sagitario':'Tu Sol en Sagitario apunta hacia horizontes infinitos. Eres el buscador de la verdad universal.','Capricornio':'Tu Sol en Capricornio escala la montaña sagrada. La disciplina es tu medicina y la maestría tu destino.','Acuario':'Tu Sol en Acuario es el visionario del nuevo paradigma. Traes la chispa del futuro al presente.','Piscis':'Tu Sol en Piscis navega el océano de lo inconsciente. Eres el puente entre lo visible y lo invisible.'},
+  '☽':{'Aries':'Tu Luna en Aries reacciona con impulso instintivo. Tu mundo emocional es un volcán de vitalidad y coraje.','Tauro':'Tu Luna en Tauro necesita seguridad y contacto con la tierra. Tus emociones florecen en la calma y la belleza.','Géminis':'Tu Luna en Géminis procesa las emociones a través de la mente. La curiosidad es tu medicina emocional.','Cáncer':'Tu Luna en Cáncer es profundamente receptiva. Tu sensibilidad es un don para nutrir y ser nutrido.','Leo':'Tu Luna en Leo necesita ser vista y amada. Tu mundo interior brilla cuando te expresas con corazón pleno.','Virgo':'Tu Luna en Virgo encuentra paz en el orden y el servicio. Sanar a otros sana tu mundo interior.','Libra':'Tu Luna en Libra busca equilibrio en las relaciones. Tu paz interior nace de la armonía compartida.','Escorpio':'Tu Luna en Escorpio siente en las profundidades. La transformación emocional es tu camino de poder.','Sagitario':'Tu Luna en Sagitario encuentra libertad en el movimiento. Tu alma se nutre de filosofía y aventura.','Capricornio':'Tu Luna en Capricornio madura sus emociones con el tiempo. Tu fortaleza interior es una roca sagrada.','Acuario':'Tu Luna en Acuario necesita libertad emocional. Tu corazón late por causas que trascienden lo personal.','Piscis':'Tu Luna en Piscis es un océano de intuición. Tu empatía es ilimitada y tu conexión con lo sutil, innata.'}
+};
+
+function getPlanetTipFull(sym,sign){
+  const base=PLANET_TIPS_MAP[sym];
+  if(base&&base[sign])return base[sign];
+  const gen={'☉':'Tu Sol define el núcleo de tu ser y tu propósito de vida.','☽':'Tu Luna revela tu mundo emocional y tus patrones inconscientes.','⬆':'Tu Ascendente es la máscara que muestras al mundo y tu estilo vital.','MC':'Tu Medio Cielo marca tu vocación pública y tu destino profesional.','☿':'Mercurio rige tu mente, comunicación y capacidad de aprendizaje.','♀':'Venus gobierna tus afectos, tu sentido de la belleza y tus valores.','♂':'Marte impulsa tu voluntad, tu energía y tu capacidad de acción.','♃':'Júpiter expande tu visión y atrae abundancia a tu camino.','♄':'Saturno te enseña disciplina, responsabilidad y sabiduría ganada.','⛢':'Urano trae cambios súbitos y despertar a tu generación.','♆':'Neptuno disuelve fronteras y conecta con lo místico y universal.','♇':'Plutón transforma desde las raíces, muerte y renacimiento del alma.','☊':'El Nodo Norte señala tu dirección evolutiva en esta vida.','⚸':'Lilith encarna tu poder salvaje, instintivo y liberador.','⚷':'Quirón es la herida que, al sanar, se convierte en tu mayor don.'};
+  return (gen[sym]||'Este cuerpo celeste influye en aspectos clave de tu carta natal.')+' En '+sign+', esta energía toma una coloración particular que marca tu camino único.';
+}
+
+const SIGN_SYMS=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+const SIGN_NAMES=['Aries','Tauro','Géminis','Cáncer','Leo','Virgo','Libra','Escorpio','Sagitario','Capricornio','Acuario','Piscis'];
+const SIGN_ELEM={Aries:'fuego',Tauro:'tierra',Géminis:'aire','Cáncer':'agua',Leo:'fuego',Virgo:'tierra',Libra:'aire',Escorpio:'agua',Sagitario:'fuego',Capricornio:'tierra',Acuario:'aire',Piscis:'agua'};
+const ELEM_ICONS={fuego:'🔥',tierra:'🌿',aire:'🌬️',agua:'🌊'};
+
+const PLANET_ORDER=[
+  {key:'sun',sym:'☉',name:'Sol'},{key:'moon',sym:'☽',name:'Luna'},{key:'asc',sym:'⬆',name:'Ascendente'},
+  {key:'mc',sym:'MC',name:'Medio Cielo'},{key:'mercury',sym:'☿',name:'Mercurio'},{key:'venus',sym:'♀',name:'Venus'},
+  {key:'mars',sym:'♂',name:'Marte'},{key:'jupiter',sym:'♃',name:'Júpiter'},{key:'saturn',sym:'♄',name:'Saturno'},
+  {key:'uranus',sym:'⛢',name:'Urano'},{key:'neptune',sym:'♆',name:'Neptuno'},{key:'pluto',sym:'♇',name:'Plutón'},
+  {key:'north_node',sym:'☊',name:'Nodo Norte'},{key:'lilith',sym:'⚸',name:'Lilith'},{key:'chiron',sym:'⚷',name:'Quirón'}
+];
+
+// Aspectos astrológicos
+const ASPECTS=[
+  {name:'Conjunción',angle:0,orb:8,col:'rgba(255,80,80,.85)',width:2.2,dash:[]},
+  {name:'Oposición',angle:180,orb:8,col:'rgba(220,80,80,.7)',width:1.8,dash:[]},
+  {name:'Trígono',angle:120,orb:8,col:'rgba(100,160,255,.75)',width:1.6,dash:[]},
+  {name:'Cuadratura',angle:90,orb:6,col:'rgba(220,80,80,.6)',width:1.4,dash:[4,3]},
+  {name:'Sextil',angle:60,orb:5,col:'rgba(100,200,130,.65)',width:1.2,dash:[2,2]},
+  {name:'Quincuncio',angle:150,orb:3,col:'rgba(200,160,80,.5)',width:1,dash:[3,3]}
+];
+
+function calcAspects(positions){
+  const keys=Object.keys(positions).filter(k=>!k.includes('_house')&&!k.includes('_retro'));
+  const aspects=[];
+  for(let i=0;i<keys.length;i++){
+    for(let j=i+1;j<keys.length;j++){
+      const a=((positions[keys[j]]-positions[keys[i]])%360+360)%360;
+      const diff=Math.min(a,360-a);
+      for(const asp of ASPECTS){
+        if(Math.abs(diff-asp.angle)<=asp.orb){
+          aspects.push({k1:keys[i],k2:keys[j],asp,diff});
+          break;
+        }
+      }
+    }
+  }
+  return aspects;
+}
+
+function norm360(x){return((x%360)+360)%360}
+function degToSignPos(totalDeg){const d=norm360(totalDeg),signIdx=Math.floor(d/30),deg=d-signIdx*30,degInt=Math.floor(deg),min=Math.round((deg-degInt)*60);return{signIdx,deg:degInt,min,total:d}}
+function dateToJD(year,month,day,hour,minute,tzOffsetHours){const UT=hour+minute/60-tzOffsetHours;let y=year,m=month;const d=day+UT/24;if(m<=2){y-=1;m+=12}const A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5}
+function getLonOffset(lonDeg){return lonDeg/15}
+
+function calcPlanetPositions(jd){
+  const T=(jd-2451545.0)/36525.0;
+  function norm(x){return((x%360)+360)%360}
+  function rad(d){return d*Math.PI/180}
+  const L0=norm(280.46646+36000.76983*T),M=norm(357.52911+35999.05029*T),Mr=rad(M);
+  const C=(1.914602-0.004817*T)*Math.sin(Mr)+(0.019993-0.000101*T)*Math.sin(2*Mr)+0.000289*Math.sin(3*Mr);
+  const sunLon=norm(L0+C);
+  const Lp=norm(218.3165+481267.8813*T),D=norm(297.8502+445267.1115*T),Mm=norm(134.9634+477198.8676*T),F=norm(93.2721+483202.0175*T);
+  const moonLon=norm(Lp+6.2888*Math.sin(rad(Mm))+1.2740*Math.sin(rad(2*D-Mm))+0.6583*Math.sin(rad(2*D))+0.2136*Math.sin(rad(2*Mm))-0.1851*Math.sin(rad(M))-0.1143*Math.sin(rad(2*F))+0.0588*Math.sin(rad(2*D-2*Mm))+0.0572*Math.sin(rad(2*D-M-Mm))+0.0533*Math.sin(rad(2*D+Mm)));
+  const mercuryLon=norm(252.251+149474.072*T+23.440*Math.sin(rad(norm(174.795+149474.070*T)))+2.9791*Math.sin(2*rad(norm(174.795+149474.070*T))));
+  const venusLon=norm(181.979+58519.213*T+0.7758*Math.sin(rad(norm(212.060+58517.804*T))));
+  const marsLon=norm(355.433+19141.696*T+10.691*Math.sin(rad(norm(19.373+19140.030*T)))+0.6230*Math.sin(2*rad(norm(19.373+19140.030*T))));
+  const jupM=norm(20.020+3034.906*T),jupiterLon=norm(34.351+3034.906*T+5.5549*Math.sin(rad(jupM))+0.1683*Math.sin(2*rad(jupM)));
+  const satM=norm(317.020+1222.114*T),saturnLon=norm(50.077+1222.114*T+6.3585*Math.sin(rad(satM))+0.2204*Math.sin(2*rad(satM)));
+  const uranusLon=norm(314.055+428.296*T+0.7741*Math.sin(rad(norm(141.896+428.296*T))));
+  const neptuneLon=norm(304.349+218.457*T+1.0170*Math.sin(rad(norm(256.225+218.457*T))));
+  const pluM=norm(14.882+145.181*T),plutoLon=norm(238.929+145.181*T+28.3150*Math.sin(rad(pluM))+4.3408*Math.sin(2*rad(pluM)));
+  const northNode=norm(125.0445-1934.1363*T+0.002073*T*T);
+  const chironLon=norm(163.35+50.083*T+6.88*Math.sin(rad(norm(209.68+50.083*T))));
+  const lilithLon=norm(83.354+40.6903*T);
+  return{sun:sunLon,moon:moonLon,mercury:mercuryLon,venus:venusLon,mars:marsLon,jupiter:jupiterLon,saturn:saturnLon,uranus:uranusLon,neptune:neptuneLon,pluto:plutoLon,north_node:northNode,chiron:chironLon,lilith:lilithLon};
+}
+
+function calcASCMC(jd,latDeg,lonDeg){
+  const T=(jd-2451545.0)/36525.0;
+  const GMST=norm360(280.46061837+360.98564736629*(jd-2451545)+0.000387933*T*T);
+  const LST=norm360(GMST+lonDeg);
+  const obliq=23.4393-0.01300*T;
+  let MC=Math.atan2(Math.tan(LST*Math.PI/180),Math.cos(obliq*Math.PI/180))*180/Math.PI;
+  if(MC<0)MC+=360;
+  if(LST>90&&LST<=270)MC=(MC+180)%360;
+  const latR=latDeg*Math.PI/180,LSTR=LST*Math.PI/180,oblR=obliq*Math.PI/180;
+  let asc=Math.atan(-Math.cos(LSTR)/(Math.sin(LSTR)*Math.cos(oblR)+Math.tan(latR)*Math.sin(oblR)))*180/Math.PI;
+  if(Math.cos(LSTR)<0)asc+=180;
+  asc=norm360(asc);
+  return{asc,mc:MC};
+}
+
+function calcHousesPlacidus(jd,lat,lon,asc,mc){
+  function placidusInterp(h1,h2,frac){let d=h2-h1;if(d<0)d+=360;return norm360(h1+d*frac)}
+  const ic=norm360(mc+180),dsc=norm360(asc+180);
+  return{1:asc,2:placidusInterp(asc,ic,1/3),3:placidusInterp(asc,ic,2/3),4:ic,5:placidusInterp(ic,dsc,1/3),6:placidusInterp(ic,dsc,2/3),7:dsc,8:placidusInterp(dsc,mc,1/3),9:placidusInterp(dsc,mc,2/3),10:mc,11:placidusInterp(mc,asc,1/3),12:placidusInterp(mc,asc,2/3)};
+}
+
+function inHouseArc(deg,h1,h2){if(h2>h1)return deg>=h1&&deg<h2;return deg>=h1||deg<h2}
+
+async function geocodeCity(cityStr){
+  try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityStr)}&limit=1`,{headers:{'Accept-Language':'es'}});const data=await r.json();if(data&&data[0])return{lat:parseFloat(data[0].lat),lon:parseFloat(data[0].lon),name:data[0].display_name.split(',').slice(0,2).join(', ')}}catch(e){}return null;
+}
+
+async function calcCarta(){
+  const dateVal=$('b-date').value,timeVal=$('b-time').value,cityVal=$('b-city').value.trim();
+  if(!dateVal||!cityVal){showCartaError('Por favor completa la fecha de nacimiento y la ciudad.');return}
+  $('carta-result').classList.remove('show');$('carta-error').classList.remove('show');$('carta-loading').classList.add('show');
+  try{
+    const geo=await geocodeCity(cityVal);
+    if(!geo){showCartaError('No se encontró la ciudad "'+cityVal+'". Intenta con formato: Ciudad, País');return}
+    const [year,month,day]=dateVal.split('-').map(Number);
+    const [hour,minute]=(timeVal||'12:00').split(':').map(Number);
+    const tzOffset=getLonOffset(geo.lon);
+    const jd=dateToJD(year,month,day,hour,minute,tzOffset);
+    const positions=calcPlanetPositions(jd);
+    const {asc,mc}=calcASCMC(jd,geo.lat,geo.lon);
+    positions.asc=asc;positions.mc=mc;
+    const houses=calcHousesPlacidus(jd,geo.lat,geo.lon,asc,mc);
+    for(const pKey of Object.keys(positions)){
+      if(pKey.includes('_'))continue;
+      let h=1;const pDeg=norm360(positions[pKey]);
+      for(let i=1;i<=12;i++){const h1=norm360(houses[i]),h2=norm360(houses[(i%12)+1]);if(inHouseArc(pDeg,h1,h2)){h=i;break}}
+      positions[pKey+'_house']=h;
+    }
+    const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    cartaData={positions,houses,geo,year,month,day,hour,minute,timeVal,cityVal,months};
+    renderCarta(cartaData);
+  }catch(e){showCartaError('Error al calcular: '+e.message+'. Verifica los datos e intenta de nuevo.');console.error(e);}
+  finally{$('carta-loading').classList.remove('show')}
+}
+
+function renderCarta(data){
+  const{positions,houses,geo,year,month,day,hour,minute,months}=data;
+  // Meta
+  const meta=$('carta-meta');meta.innerHTML='';
+  ['📅 '+day+' '+months[month-1]+' '+year,'🕐 '+(hour||12)+':'+(String(minute||0).padStart(2,'0')),'📍 '+geo.name].forEach(t=>{const s=document.createElement('span');s.className='cm-tag';s.textContent=t;meta.appendChild(s)});
+  // Tabla posiciones
+  const tbl=$('pos-table');tbl.innerHTML='';
+  PLANET_ORDER.forEach(p=>{
+    const lon=positions[p.key];if(lon===undefined)return;
+    const pos=degToSignPos(lon),house=positions[p.key+'_house']||'';
+    const row=document.createElement('div');row.className='pos-row';
+    row.innerHTML='<span class="pos-sym">'+p.sym+'</span><span class="pos-name">'+p.name+'</span><span class="pos-sign">'+SIGN_SYMS[pos.signIdx]+' '+SIGN_NAMES[pos.signIdx]+'</span><span class="pos-deg">'+pos.deg+'°'+String(pos.min).padStart(2,'0')+'′</span>'+(house?'<span class="pos-house">C'+house+'</span>':'<span class="pos-house"></span>');
+    row.onclick=()=>{document.querySelectorAll('.pos-row').forEach(r=>r.classList.remove('on'));row.classList.add('on');$('planet-tip').querySelector('p').textContent=getPlanetTipFull(p.sym,SIGN_NAMES[pos.signIdx])};
+    tbl.appendChild(row);
+  });
+  // Casas
+  const cg=$('casas-grid');cg.innerHTML='';
+  for(let i=1;i<=12;i++){const lon=houses[i];if(lon===undefined)continue;const pos=degToSignPos(lon);const cell=document.createElement('div');cell.className='casa-cell';cell.innerHTML='<span class="casa-num">Casa '+i+'</span><span class="casa-val">'+SIGN_SYMS[pos.signIdx]+' '+pos.deg+'°</span>';cg.appendChild(cell)}
+  // Elementos
+  const elemCount={fuego:0,tierra:0,aire:0,agua:0};
+  ['sun','moon','mercury','venus','mars','jupiter','saturn'].forEach(k=>{const lon=positions[k];if(lon===undefined)return;const sName=SIGN_NAMES[degToSignPos(lon).signIdx];const elem=SIGN_ELEM[sName];if(elem)elemCount[elem]++});
+  const es=$('elem-summary');es.innerHTML='';
+  Object.entries(elemCount).forEach(([k,v])=>{const d=document.createElement('div');d.className='es-item';d.innerHTML='<span class="es-count">'+ELEM_ICONS[k]+' '+v+'x</span><span class="es-label">'+k.charAt(0).toUpperCase()+k.slice(1)+'</span>';es.appendChild(d)});
+  // Rueda
+  drawCartaWheelPro(positions,houses);
+  $('carta-result').classList.add('show');
+  setTimeout(()=>$('carta-result').scrollIntoView({behavior:'smooth',block:'start'}),200);
+}
+
+// ── Rueda Natal Profesional estilo Astro-Seek ──
+function drawCartaWheelPro(positions,houses){
+  const canvas=$('carta-wheel'),ctx=canvas.getContext('2d');
+  const W=480,H=480,cx=240,cy=240;
+  ctx.clearRect(0,0,W,H);
+
+  const ascDeg=positions.asc!==undefined?positions.asc:0;
+  const rotOff=(180-ascDeg)*(Math.PI/180);
+  function eclToCanvas(lon){return rotOff+(lon*Math.PI/180)-Math.PI/2+Math.PI}
+
+  // Radios estilo astro-seek
+  const Ro=228,Rz=205,Rm=180,Rh=158,Ri=135,Rp=108,Rc=48;
+  // Marcas de grado (externas, estilo regla)
+  const signColors=['#CC5533','#779955','#5599CC','#8855CC','#DDAA22','#558866','#9966CC','#CC4444','#DD8833','#668877','#4499BB','#7777CC'];
+
+  // Fondo oscuro exterior
+  ctx.beginPath();ctx.arc(cx,cy,Ro+6,0,6.28);ctx.fillStyle='rgba(10,5,26,.98)';ctx.fill();
+
+  // ── Anillo zodiacal coloreado ──
+  for(let i=0;i<12;i++){
+    const a1=eclToCanvas(i*30),a2=eclToCanvas((i+1)*30);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,Ro,a1,a2);ctx.closePath();
+    // Alternado claro/oscuro dentro del anillo
+    const isEven=i%2===0;
+    ctx.fillStyle=isEven?'rgba(22,12,50,.95)':'rgba(12,5,30,.95)';ctx.fill();
+    ctx.strokeStyle='rgba(201,168,76,.15)';ctx.lineWidth=.4;ctx.stroke();
+    // Símbolo zodiacal
+    const mid=eclToCanvas(i*30+15);
+    const sx=cx+Math.cos(mid)*(Ro+Rz)/2,sy=cy+Math.sin(mid)*(Ro+Rz)/2;
+    ctx.font='bold 14px serif';ctx.fillStyle=signColors[i];
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(SIGN_SYMS[i],sx,sy);
+  }
+
+  // ── Marcas de grado en el anillo externo ──
+  for(let deg=0;deg<360;deg++){
+    const ang=eclToCanvas(deg);
+    const isMajor=deg%30===0,isMinor=deg%5===0;
+    const r1=Ro-(isMajor?12:isMinor?8:5),r2=Ro;
+    ctx.beginPath();ctx.moveTo(cx+Math.cos(ang)*r1,cy+Math.sin(ang)*r1);ctx.lineTo(cx+Math.cos(ang)*r2,cy+Math.sin(ang)*r2);
+    ctx.strokeStyle=isMajor?'rgba(201,168,76,.6)':'rgba(201,168,76,.2)';ctx.lineWidth=isMajor?1.2:.4;ctx.stroke();
+  }
+
+  // ── Círculos concéntricos (estructura interna) ──
+  [[Rz,.18,1],[Rm,.1,.5],[Rh,.08,.5],[Ri,.06,.4],[Rp,.07,.6],[Rc,.12,.8]].forEach(([r,a,lw])=>{
+    ctx.beginPath();ctx.arc(cx,cy,r,0,6.28);ctx.strokeStyle='rgba(201,168,76,'+a+')';ctx.lineWidth=lw;ctx.stroke();
+  });
+
+  // ── Líneas de casas ──
+  if(houses){
+    for(let i=1;i<=12;i++){
+      const lon=houses[i];if(lon===undefined)continue;
+      const ang=eclToCanvas(lon);
+      const isMajor=[1,4,7,10].includes(i);
+      const r1=isMajor?Rc:Ri,r2=isMajor?Rz:Rm;
+      ctx.beginPath();ctx.moveTo(cx+Math.cos(ang)*r1,cy+Math.sin(ang)*r1);ctx.lineTo(cx+Math.cos(ang)*r2,cy+Math.sin(ang)*r2);
+      ctx.strokeStyle=isMajor?'rgba(201,168,76,.65)':'rgba(201,168,76,.22)';ctx.lineWidth=isMajor?1.5:.6;ctx.stroke();
+      // Etiquetas ASC/DSC/MC/IC
+      if([1,4,7,10].includes(i)){
+        const labels={1:'ASC',4:'IC',7:'DSC',10:'MC'};
+        const lr=(i===1||i===7)?Rz+16:Rz+16;
+        const lx=cx+Math.cos(ang)*lr,ly=cy+Math.sin(ang)*lr;
+        ctx.font='bold 9px Inter,sans-serif';ctx.fillStyle='rgba(201,168,76,.9)';
+        ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(labels[i],lx,ly);
+      }
+      // Números de casa dentro del anillo
+      if(houses[(i%12)+1]!==undefined){
+        const nextLon=houses[(i%12)+1];
+        const midAng=eclToCanvas((lon+nextLon+(lon>nextLon?360:0))/2);
+        ctx.font='9px Inter,sans-serif';ctx.fillStyle='rgba(201,168,76,.38)';
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(i,cx+Math.cos(midAng)*(Ri+8),cy+Math.sin(midAng)*(Ri+8));
+      }
+    }
+  }
+
+  // ── Líneas de aspecto ──
+  if(cartaShowLines&&positions){
+    const aspects=calcAspects(positions);
+    const pLookup={};
+    PLANET_ORDER.forEach(p=>{if(positions[p.key]!==undefined)pLookup[p.key]=positions[p.key]});
+    aspects.forEach(asp=>{
+      const lon1=pLookup[asp.k1],lon2=pLookup[asp.k2];
+      if(lon1===undefined||lon2===undefined)return;
+      const a1=eclToCanvas(lon1),a2=eclToCanvas(lon2);
+      const x1=cx+Math.cos(a1)*Rp*.9,y1=cy+Math.sin(a1)*Rp*.9;
+      const x2=cx+Math.cos(a2)*Rp*.9,y2=cy+Math.sin(a2)*Rp*.9;
+      ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+      ctx.strokeStyle=asp.asp.col;ctx.lineWidth=asp.asp.width;
+      ctx.setLineDash(asp.asp.dash);ctx.stroke();ctx.setLineDash([]);
+    });
+  }
+
+  // ── Planetas ──
+  const PDRAW=[
+    {key:'sun',sym:'☉',col:'rgba(255,220,80,.95)'},{key:'moon',sym:'☽',col:'rgba(200,200,255,.95)'},
+    {key:'mercury',sym:'☿',col:'rgba(180,230,180,.9)'},{key:'venus',sym:'♀',col:'rgba(255,180,220,.9)'},
+    {key:'mars',sym:'♂',col:'rgba(255,100,80,.9)'},{key:'jupiter',sym:'♃',col:'rgba(255,210,120,.9)'},
+    {key:'saturn',sym:'♄',col:'rgba(210,195,160,.9)'},{key:'uranus',sym:'⛢',col:'rgba(120,225,255,.9)'},
+    {key:'neptune',sym:'♆',col:'rgba(130,150,255,.9)'},{key:'pluto',sym:'♇',col:'rgba(200,130,255,.9)'},
+    {key:'asc',sym:'AC',col:'rgba(255,235,140,.95)',size:8},{key:'mc',sym:'MC',col:'rgba(140,255,200,.9)',size:7},
+    {key:'north_node',sym:'☊',col:'rgba(201,168,76,.8)',size:8},{key:'chiron',sym:'⚷',col:'rgba(200,180,150,.8)',size:8}
+  ];
+  // Ajuste anti-colisión simple
+  const placed=[];
+  PDRAW.forEach(p=>{
+    const lon=positions[p.key];if(lon===undefined)return;
+    const ang=eclToCanvas(lon);
+    let pr=Rp;
+    placed.forEach(pp=>{const diff=Math.abs(ang-pp.ang)%(2*Math.PI);if(diff<0.38)pr=Math.max(Rc+14,pp.r-16)});
+    pr=Math.max(Rc+12,pr);placed.push({ang,r:pr});
+    const px=cx+Math.cos(ang)*pr,py=cy+Math.sin(ang)*pr;
+    // Fondo de círculo
+    ctx.beginPath();ctx.arc(px,py,11,0,6.28);ctx.fillStyle='rgba(7,7,26,.92)';ctx.fill();
+    ctx.strokeStyle=p.col.replace('.9','0.45').replace('.95','0.45');ctx.lineWidth=.8;ctx.stroke();
+    // Símbolo
+    ctx.font=(p.size||11)+'px serif';ctx.fillStyle=p.col;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.sym,px,py);
+    // Línea de posición hacia el borde
+    ctx.beginPath();ctx.moveTo(cx+Math.cos(ang)*(Rm-.5),cy+Math.sin(ang)*(Rm-.5));ctx.lineTo(cx+Math.cos(ang)*Ri,cy+Math.sin(ang)*Ri);
+    ctx.strokeStyle=p.col.replace('.9)','0.15)').replace('.95)','0.15)');ctx.lineWidth=.5;ctx.stroke();
+  });
+
+  // ── Centro ──
+  const cg2=ctx.createRadialGradient(cx,cy,0,cx,cy,Rc);cg2.addColorStop(0,'rgba(130,60,220,.2)');cg2.addColorStop(1,'transparent');
+  ctx.fillStyle=cg2;ctx.beginPath();ctx.arc(cx,cy,Rc,0,6.28);ctx.fill();
+  ctx.font='bold 18px serif';ctx.fillStyle='rgba(230,210,160,.65)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('✦',cx,cy);
+}
+
+function toggleAspectLines(){
+  cartaShowLines=!cartaShowLines;
+  const btn=$('btn-toggle-lines');
+  btn.textContent=cartaShowLines?'👁 Ocultar líneas de aspecto':'👁 Mostrar líneas de aspecto';
+  btn.classList.toggle('active',!cartaShowLines);
+  if(cartaData)drawCartaWheelPro(cartaData.positions,cartaData.houses);
+}
+
+function showCartaError(msg){$('carta-loading').classList.remove('show');const e=$('carta-error');e.textContent=msg;e.classList.add('show')}
+function clearCarta(){$('b-date').value='';$('b-time').value='';$('b-city').value='';$('carta-error').classList.remove('show')}
+function resetCarta(){clearCarta();$('carta-result').classList.remove('show');$('carta-loading').classList.remove('show');$('planet-tip').querySelector('p').textContent='Selecciona un planeta para conocer su influencia chamánica...';cartaData=null;$('carta-natal').scrollIntoView({behavior:'smooth',block:'start'})}
+
+// ── Descarga carta natal como DOCX (usando la API Anthropic) ──
+async function downloadCartaDocx(){
+  if(!cartaData){alert('Primero genera tu carta natal.');return}
+  const btn=document.querySelector('.cwc-btn:last-child');
+  const orig=btn.textContent;btn.textContent='⏳ Generando documento...';btn.disabled=true;
+  try{
+    await generateAndDownloadDocx('carta',cartaData);
+  }finally{btn.textContent=orig;btn.disabled=false}
+}
+
+async function downloadSectionDocx(sectionId){
+  const sectionNames={elementos:'Los 4 Elementos',pendulo:'El Péndulo',chakras:'Los 7 Chakras',tarot:'Tiradas de Tarot',arcanos:'Arcanos Mayores',servicios:'Servicios'};
+  await generateAndDownloadDocx(sectionId,null);
+}
+
+// Generador universal de DOCX por sección
+async function generateAndDownloadDocx(sectionId,data){
+  const sectionLabel={carta:'Carta_Natal',elementos:'Elementos',chakras:'Chakras',tarot:'Tarot',arcanos:'Arcanos',pendulo:'Pendulo',servicios:'Servicios'}[sectionId]||sectionId;
+
+  // Preparar payload estructurado para el servidor Node
+  let payload={title:sectionId};
+  if(sectionId==='carta'&&data){
+    const{positions,houses,geo,year,month,day,hour,minute,months}=data;
+    const monthNames=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const planetsArr=[];
+    PLANET_ORDER.forEach(p=>{
+      const lon=positions[p.key];if(lon===undefined)return;
+      const pos=degToSignPos(lon),house=positions[p.key+'_house']||'';
+      planetsArr.push({sym:p.sym,name:p.name,sign:SIGN_NAMES[pos.signIdx],deg:pos.deg+'°'+String(pos.min).padStart(2,'0')+'′',house});
+    });
+    const housesArr=[];
+    for(let i=1;i<=12;i++){if(houses[i]===undefined)continue;const pos=degToSignPos(houses[i]);housesArr.push({num:'Casa '+i,sign:SIGN_NAMES[pos.signIdx],deg:pos.deg})}
+    const elemCount={fuego:0,tierra:0,aire:0,agua:0};
+    ['sun','moon','mercury','venus','mars','jupiter','saturn'].forEach(k=>{const lon=positions[k];if(lon===undefined)return;const sName=SIGN_NAMES[degToSignPos(lon).signIdx];const elem=SIGN_ELEM[sName];if(elem)elemCount[elem]++});
+    const interps=[];
+    PLANET_ORDER.slice(0,7).forEach(p=>{const lon=positions[p.key];if(lon===undefined)return;const pos=degToSignPos(lon);interps.push({titulo:p.sym+' '+p.name+' en '+SIGN_NAMES[pos.signIdx],texto:getPlanetTipFull(p.sym,SIGN_NAMES[pos.signIdx])})});
+    payload.cartaData={day,monthName:monthNames[month-1],year,hour:hour||12,minute:minute||0,city:geo.name,planets:planetsArr,houses:housesArr,elementos:elemCount,interpretaciones:interps};
+  }else{
+    const sec=document.getElementById(sectionId);
+    payload.content=sec?sec.innerText:'';
+  }
+
+  // Intentar servidor local (localhost:3001)
+  try{
+    const resp=await fetch('http://localhost:3001/generate-docx',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(5000)});
+    if(resp.ok){
+      const blob=await resp.blob();
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download='TA-ROD_'+sectionLabel+'.docx';a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+  }catch(e){/* servidor no disponible */}
+
+  // Fallback: descarga como TXT formateado
+  let content='TA-ROD · '+sectionLabel.replace(/_/g,' ')+'\n';
+  content+='Generado: '+new Date().toLocaleString('es-CR')+'\n';
+  content+='━'.repeat(50)+'\n\n';
+  if(payload.cartaData){
+    const d=payload.cartaData;
+    content+='DATOS DE NACIMIENTO\n';
+    content+='Fecha: '+d.day+' '+d.monthName+' '+d.year+'\n';
+    content+='Hora: '+d.hour+':'+String(d.minute).padStart(2,'0')+'\n';
+    content+='Ciudad: '+d.city+'\n\n';
+    content+='POSICIONES PLANETARIAS\n';
+    d.planets.forEach(p=>content+=p.sym+' '+p.name+': '+p.sign+' '+p.deg+(p.house?' Casa '+p.house:'')+'\n');
+    content+='\nCASAS (PLACIDUS)\n';
+    d.houses.forEach(h=>content+=h.num+': '+h.sign+' '+h.deg+'°\n');
+    content+='\nELEMENTOS\n';
+    Object.entries(d.elementos).forEach(([k,v])=>content+=k+': '+v+'x\n');
+    content+='\nINTERPRETACIÓN CHAMÁNICA\n\n';
+    d.interpretaciones.forEach(i=>content+=i.titulo+':\n'+i.texto+'\n\n');
+  }else if(payload.content){content+=payload.content}
+  content+='\n━'.repeat(50)+'\n✦ TA-ROD · Tarot · Astrología · Chamanismo · 📞 8821-5669\n';
+  content+='Para descargar como .docx: ejecuta node server.js en la carpeta tarod-server\n';
+
+  const blob=new Blob(['\uFEFF'+content],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='TA-ROD_'+sectionLabel+'.txt';a.click();
+  URL.revokeObjectURL(url);
+  // Notificación suave sin alert molesto
+  const notif=document.createElement('div');
+  notif.style.cssText='position:fixed;bottom:2rem;right:2rem;background:rgba(18,10,46,.97);border:1px solid rgba(201,168,76,.4);padding:1rem 1.5rem;color:rgba(230,210,160,.9);font-family:Cormorant Garamond,serif;font-size:.9rem;font-style:italic;z-index:9999;max-width:320px;line-height:1.6';
+  notif.innerHTML='✦ Descargado como .txt<br><span style="font-size:.75rem;color:rgba(154,138,106,.8)">Para .docx: ejecuta el servidor Node incluido.</span>';
+  document.body.appendChild(notif);
+  setTimeout(()=>notif.remove(),4000);
+}
+
+// ═══════════════════════════════════════
+// ELEMENTOS
+// ═══════════════════════════════════════
+function activElem(el){document.querySelectorAll('.ec').forEach(c=>c.classList.remove('active'));el.classList.add('active')}
+
+// ═══════════════════════════════════════
+// PÉNDULO
+// ═══════════════════════════════════════
+let PS={angle:0,vel:0,swing:false,mode:'idle',ans:null,t:0};
+const pC=$('pend-canvas'),pX=pC.getContext('2d');
+function drawPend(){
+  pX.clearRect(0,0,460,340);
+  const ox=230,oy=38,len=205;
+  pX.beginPath();pX.moveTo(185,oy);pX.lineTo(275,oy);pX.strokeStyle='rgba(201,168,76,.28)';pX.lineWidth=1.5;pX.stroke();
+  pX.beginPath();pX.moveTo(222,oy);pX.lineTo(238,oy);pX.strokeStyle='rgba(201,168,76,.55)';pX.lineWidth=2.5;pX.stroke();
+  const bx=ox+Math.sin(PS.angle)*len,by=oy+Math.cos(PS.angle)*len;
+  const gd=pX.createLinearGradient(ox,oy,bx,by);gd.addColorStop(0,'rgba(201,168,76,.55)');gd.addColorStop(1,'rgba(201,168,76,.18)');
+  pX.beginPath();pX.moveTo(ox,oy);pX.lineTo(bx,by);pX.strokeStyle=gd;pX.lineWidth=1;pX.stroke();
+  pX.save();pX.translate(bx,by);pX.rotate(PS.angle);
+  const cp=[[0,-15],[7,0],[0,15],[-7,0]];
+  pX.beginPath();pX.moveTo(cp[0][0],cp[0][1]);cp.forEach(p=>pX.lineTo(p[0],p[1]));pX.closePath();
+  const cg=pX.createLinearGradient(-7,-15,7,15);cg.addColorStop(0,'rgba(170,130,215,.9)');cg.addColorStop(.5,'rgba(201,168,76,.85)');cg.addColorStop(1,'rgba(90,50,195,.75)');
+  pX.fillStyle=cg;pX.fill();pX.strokeStyle='rgba(230,210,160,.55)';pX.lineWidth=.8;pX.stroke();
+  pX.restore();
+  if(PS.swing){const ar=18+7*Math.sin(PS.t*.05),ag=pX.createRadialGradient(bx,by,0,bx,by,ar);ag.addColorStop(0,'rgba(140,70,240,.28)');ag.addColorStop(1,'transparent');pX.fillStyle=ag;pX.beginPath();pX.arc(bx,by,ar,0,6.28);pX.fill()}
+}
+function pendLoop(){
+  if(PS.swing){
+    PS.t++;
+    PS.vel-=.015*Math.sin(PS.angle);PS.vel*=.995;PS.angle+=PS.vel;
+    if(PS.mode==='circ'){PS.angle=.3*Math.sin(PS.t*.05);if(PS.t>110&&!PS.ans)showPendAns()}
+    else if(Math.abs(PS.vel)<.0005&&PS.t>90&&!PS.ans)showPendAns();
+  }
+  drawPend();requestAnimationFrame(pendLoop);
+}
+requestAnimationFrame(pendLoop);
+function consultPend(){PS={angle:.48,vel:0,swing:true,mode:Math.random()>.5?'circ':'swing',ans:null,t:0};$('pend-ans').classList.remove('show')}
+function showPendAns(){PS.ans=true;const a=['Sí ✦ La energía fluye a tu favor','No ✦ El momento aún no es propicio','Sí ✦ Confía en tu intuición','Neutro ✦ Reflexiona más profundo','Sí ✦ El universo te sostiene'];const el=$('pend-ans');el.textContent=a[Math.floor(Math.random()*a.length)];el.classList.add('show')}
+
+// ═══════════════════════════════════════
+// CHAKRAS — Sistema Interactivo Completo
+// ═══════════════════════════════════════
+
+const CH_DATA=[
+  {
+    idx:0,name:'Raíz',sk:'Muladhara',col:'#E74C3C',
+    esencia:'El primer centro energético ancla tu existencia al plano físico. Es la base de toda seguridad, la raíz que permite al árbol del ser extenderse hacia el cielo sin miedo a caer.',
+    symptoms:['Ansiedad y miedos recurrentes','Dificultad para sentirte seguro/a','Problemas económicos o materiales','Tensión en piernas, rodillas o espalda baja','Desconexión del cuerpo físico'],
+    mantra:'"Tengo derecho a estar aquí. Estoy a salvo. La tierra me sostiene."',
+    elem:'Tierra · Nota Do (C) · 256 Hz',
+    colorFreq:'Rojo · Frecuencia 396 Hz (liberación del miedo)',
+    tools:[
+      {icon:'💎',name:'Cristal',key:'cristal'},
+      {icon:'🌿',name:'Aceite',key:'aceite'},
+      {icon:'🧘',name:'Asana',key:'asana'},
+      {icon:'🎵',name:'Sonido',key:'sonido'},
+      {icon:'🌱',name:'Práctica',key:'practica'}
+    ],
+    recipes:{
+      cristal:{title:'Cristal: Jaspe Rojo o Obsidiana',sub:'Herramienta de anclaje y protección',steps:['Sostén el cristal en tu mano dominante durante la meditación o colócalo entre tus pies.','Visualiza una luz roja brillante fluyendo desde la base de tu columna hacia la tierra.','Declara en voz alta: "Me anclo, me protejo, me enraízo en la tierra sagrada."','Carga el cristal bajo la luz del sol o en tierra durante 24 horas antes de usarlo.']},
+      aceite:{title:'Aceite: Pachulí o Vetiver',sub:'Aromaterapia para el enraizamiento',steps:['Diluye 3 gotas de aceite esencial en una cucharadita de aceite portador (almendras, coco).','Aplica en la planta de los pies y en la zona baja de la espalda con movimientos circulares.','Inhala profundamente 3 veces mientras aplicas, visualizando raíces creciendo desde tus pies.','Repite cada mañana al despertar para establecer el arraigo del día.']},
+      asana:{title:'Asana: Virabhadrasana I (Guerrero I)',sub:'Postura de enraizamiento y poder',steps:['Colócate de pie, pies separados. Da un paso grande hacia adelante con el pie derecho.','Dobla la rodilla delantera en ángulo recto. Extiende los brazos hacia arriba.','Mantén la postura 5 respiraciones largas. Siente el contacto firme con el suelo.','Repite en ambos lados. Visualiza raíces desde tus pies al centro de la tierra.']},
+      sonido:{title:'Sonido: Mantra LAM',sub:'Vibración activadora del primer chakra',steps:['Siéntate con la columna erguida. Coloca las manos sobre los muslos.','Inhala profundamente. Al exhalar, entona "LAAAAM" con voz grave y resonante.','Siente la vibración en la base de la columna y en los glúteos.','Repite 7 veces. Observa la sensación de calor y peso en el centro de la raíz.']},
+      practica:{title:'Práctica: Caminata de Tierra Descalza',sub:'Grounding directo con la naturaleza',steps:['Busca un espacio con tierra, césped o arena. Retira el calzado.','Camina lentamente durante 10-15 minutos con plena atención en cada paso.','Con cada pisada, imagina que absorbes energía estabilizadora de la tierra.','Al terminar, permanece de pie un momento y agradece el sostén de la tierra.']}
+    }
+  },
+  {
+    idx:1,name:'Sacro',sk:'Svadhisthana',col:'#E67E22',
+    esencia:'Centro de la creatividad sagrada, la sensualidad y el flujo emocional. Aquí reside tu capacidad de crear vida, de sentir placer como medicina y de relacionarte con el mundo desde la autenticidad de tus emociones.',
+    symptoms:['Bloqueos creativos persistentes','Dificultad para disfrutar el placer','Rigidez emocional o hipersensibilidad','Tensión en caderas y zona pélvica','Relaciones superficiales o codependientes'],
+    mantra:'"Fluyo con la vida. Mi creatividad es sagrada. El placer es mi medicina."',
+    elem:'Agua · Nota Re (D) · 288 Hz',
+    colorFreq:'Naranja · Frecuencia 417 Hz (facilitación del cambio)',
+    tools:[
+      {icon:'💎',name:'Cristal',key:'cristal'},
+      {icon:'🌿',name:'Aceite',key:'aceite'},
+      {icon:'🧘',name:'Asana',key:'asana'},
+      {icon:'🎵',name:'Sonido',key:'sonido'},
+      {icon:'🌊',name:'Práctica',key:'practica'}
+    ],
+    recipes:{
+      cristal:{title:'Cristal: Cornalina o Piedra de Luna',sub:'Activación de la creatividad y la fluidez',steps:['Coloca el cristal sobre el abdomen bajo (debajo del ombligo) mientras descansas.','Visualiza una luz naranja cálida irradiando desde ese centro hacia tu pelvis.','Sostén durante 10-15 minutos con respiración abdominal profunda.','Carga el cristal a la luz de la luna llena para potenciar su energía femenina.']},
+      aceite:{title:'Aceite: Ylang-ylang o Naranja Dulce',sub:'Aromaterapia para liberar la creatividad',steps:['Mezcla 3 gotas en aceite portador. Aplica en el abdomen bajo con movimientos en espiral.','Aplica también en la zona lumbar y caderas, masajeando suavemente.','Inhala el aroma profundamente y permite que la mente se relaje y libere el control.','Ideal antes de una actividad creativa, en el baño o antes de dormir.']},
+      asana:{title:'Asana: Baddha Konasana (Mariposa)',sub:'Apertura de caderas y liberación emocional',steps:['Siéntate en el suelo. Une las plantas de los pies y acércalos hacia ti.','Sostén los tobillos o los pies. Permite que las rodillas caigan naturalmente.','Permanece 8-10 respiraciones largas. No fuerces — deja que la cadera se abra.','Con cada exhalación, imagina que sueltas bloqueos emocionales almacenados en la pelvis.']},
+      sonido:{title:'Sonido: Mantra VAM',sub:'Vibración del centro creativo y emocional',steps:['Siéntate cómodamente. Coloca una mano sobre el bajo vientre.','Inhala. Al exhalar, entona "VAAAAM" con tono medio-grave.','Siente la vibración irradiando desde el punto 2 dedos bajo el ombligo.','Repite 7 veces. Observa sensaciones de calor, fluidez o liberación en el área.']},
+      practica:{title:'Práctica: Escritura Creativa Libre',sub:'Desbloqueo del flujo creativo interior',steps:['Toma papel y bolígrafo. Pon un temporizador de 10 minutos.','Escribe sin parar, sin corregir, sin levantar el bolígrafo del papel.','No importa lo que salga — el objetivo es el flujo, no el contenido.','Al terminar, lee en silencio lo que escribiste. Observa qué quería ser expresado.']}
+    }
+  },
+  {
+    idx:2,name:'Plexo Solar',sk:'Manipura',col:'#F39C12',
+    esencia:'El centro del poder personal, la voluntad y la confianza en uno mismo. Aquí se forja la capacidad de actuar en el mundo desde la autenticidad, de decir sí y no desde el centro, de tomar decisiones que honren tu ser.',
+    symptoms:['Baja autoestima o necesidad de aprobación','Dificultad para establecer límites','Procrastinación crónica','Problemas digestivos o tensión abdominal','Sensación de falta de control en la vida'],
+    mantra:'"Soy capaz. Me permito brillar. Mi voluntad está alineada con mi alma."',
+    elem:'Fuego · Nota Mi (E) · 320 Hz',
+    colorFreq:'Amarillo · Frecuencia 528 Hz (transformación y reparación)',
+    tools:[
+      {icon:'💎',name:'Cristal',key:'cristal'},
+      {icon:'🌿',name:'Aceite',key:'aceite'},
+      {icon:'🧘',name:'Asana',key:'asana'},
+      {icon:'🎵',name:'Sonido',key:'sonido'},
+      {icon:'☀️',name:'Práctica',key:'practica'}
+    ],
+    recipes:{
+      cristal:{title:'Cristal: Citrino o Ojo de Tigre',sub:'Potenciador del poder personal y la confianza',steps:['Coloca el cristal sobre el plexo solar (entre el ombligo y el esternón) al meditar.','Visualiza un sol dorado brillante expandiéndose desde ese punto hacia afuera.','Repite mentalmente: "Soy poderoso/a, soy capaz, actúo desde mi centro."','El Citrino no necesita limpieza frecuente — absorbe y transforma la energía negativa.']},
+      aceite:{title:'Aceite: Limón o Jengibre',sub:'Estimulación de la confianza y la energía vital',steps:['Mezcla 4 gotas en aceite portador. Aplica en el abdomen superior en movimientos circulares.','Inhala el aroma directamente de las palmas: estimula la mente y activa la voluntad.','Aplica antes de situaciones que requieran confianza: presentaciones, conversaciones difíciles.','El jengibre calienta y activa; el limón purifica y clarifica el propósito.']},
+      asana:{title:'Asana: Navasana (Bote)',sub:'Fortalecimiento del núcleo y el poder interior',steps:['Siéntate. Inclínate levemente atrás, levanta las piernas extendidas a 45°.','Extiende los brazos hacia adelante paralelos al suelo. Mantén la columna larga.','Sostén 5 respiraciones. Siente el fuego interno activándose en el centro.','Descansa y repite 3 veces. Con cada vez, afirma: "Mi centro es fuerte y estable."']},
+      sonido:{title:'Sonido: Mantra RAM',sub:'Activación del fuego interior',steps:['De pie o sentado. Coloca ambas manos sobre el abdomen, una sobre la otra.','Inhala desde el diafragma. Al exhalar, entona "RAAAAM" con energía y determinación.','Siente la vibración resonar en todo el tronco, como un fuego que se enciende.','Repite 7 veces con intención de activar tu poder personal y tu voluntad creativa.']},
+      practica:{title:'Práctica: El Acto Valiente Diario',sub:'Entrenamiento de la confianza en acción',steps:['Cada mañana, identifica UN pequeño acto que normalmente evitas por inseguridad.','Comprométete a realizarlo antes del mediodía. No tiene que ser grande.','Al completarlo, coloca la mano sobre el plexo solar y di: "Lo hice. Soy capaz."','Lleva un registro semanal. La confianza se construye con victorias pequeñas y consistentes.']}
+    }
+  },
+  {
+    idx:3,name:'Corazón',sk:'Anahata',col:'#27AE60',
+    esencia:'El puente entre los chakras inferiores (tierra) y superiores (cielo). Aquí reside el amor incondicional, la compasión por uno mismo y por los demás, la capacidad de perdonar y de recibir amor sin condiciones ni defensas.',
+    symptoms:['Dificultad para confiar en el amor','Resentimientos no resueltos','Aislamiento o soledad elegida','Tensión en el pecho o problemas respiratorios','Necesidad de perfección para merecer amor'],
+    mantra:'"Merezco amor. Soy amor. El amor fluye libremente hacia mí y desde mí."',
+    elem:'Aire · Nota Fa (F) · 341 Hz',
+    colorFreq:'Verde · Frecuencia 639 Hz (reconexión y relaciones)',
+    tools:[
+      {icon:'💎',name:'Cristal',key:'cristal'},
+      {icon:'🌿',name:'Aceite',key:'aceite'},
+      {icon:'🧘',name:'Asana',key:'asana'},
+      {icon:'🎵',name:'Sonido',key:'sonido'},
+      {icon:'💚',name:'Práctica',key:'practica'}
+    ],
+    recipes:{
+      cristal:{title:'Cristal: Cuarzo Rosa o Malaquita',sub:'Apertura del corazón y sanación emocional',steps:['Coloca el cristal sobre el corazón al meditar o al dormir.','Visualiza una luz verde esmeralda o rosa suave irradiando desde el pecho.','Repite mentalmente: "Abro mi corazón al amor. Me perdono. Perdono a otros."','El Cuarzo Rosa puede llevarse como joya para mantener el campo del corazón abierto.']},
+      aceite:{title:'Aceite: Rosa o Geranio',sub:'Apertura emocional y compasión',steps:['Diluye 3 gotas de aceite de rosa en aceite portador. Es muy concentrado — usa poco.','Aplica sobre el esternón con movimientos circulares en sentido horario.','Inhala profundamente y permite que el aroma te transporte a una sensación de amor.','Ideal en momentos de tristeza, pérdida o cuando necesitas reconectar con la compasión.']},
+      asana:{title:'Asana: Ustrasana (Camello)',sub:'Apertura profunda del corazón',steps:['Arrodíllate. Coloca las manos en la zona lumbar con los pulgares hacia abajo.','Gradualmente inclina el torso hacia atrás, abriendo el pecho hacia el cielo.','Si puedes, lleva las manos a los talones. Si no, mantén en la zona lumbar.','Sostén 5 respiraciones. Imagina que el corazón se abre como una flor al sol.']},
+      sonido:{title:'Sonido: Mantra YAM',sub:'Activación del centro del amor incondicional',steps:['Siéntate. Coloca ambas manos sobre el corazón, una sobre la otra.','Inhala amorosamente. Al exhalar, entona "YAAAAM" con suavidad y apertura.','Siente la vibración resonar en el pecho, relajando cualquier tensión emocional.','Repite 7 veces. Permite que lágrimas o emociones fluyan sin resistirlas.']},
+      practica:{title:'Práctica: Carta de Amor Propio',sub:'Reconstrucción de la relación con uno mismo',steps:['Toma un papel y escríbete una carta de amor desde tu Ser Superior.','Incluye todo lo que mereces escuchar: lo que valoras de ti, lo que te perdonas.','No seas pragmático/a — sé generoso/a con el lenguaje amoroso.','Lee la carta en voz alta, de pie frente al espejo, con plena presencia.']}
+    }
+  },
+  {
+    idx:4,name:'Garganta',sk:'Vishuddha',col:'#00B4D8',
+    esencia:'El centro de la expresión auténtica, la verdad personal y la comunicación sagrada. Aquí se aloja el poder de nombrar la realidad, de decir tu verdad sin miedo, de usar la voz como instrumento de creación y de sanación.',
+    symptoms:['Dificultad para expresar lo que sientes','Miedo al juicio o a la crítica','Voz tensa o problemas de garganta frecuentes','Comunicación indirecta o evasiva','Sensación de que nadie te escucha'],
+    mantra:'"Mi voz importa. Hablo mi verdad con claridad y compasión. Soy escuchado/a."',
+    elem:'Éter/Espacio · Nota Sol (G) · 384 Hz',
+    colorFreq:'Azul claro · Frecuencia 741 Hz (expresión y solución)',
+    tools:[
+      {icon:'💎',name:'Cristal',key:'cristal'},
+      {icon:'🌿',name:'Aceite',key:'aceite'},
+      {icon:'🧘',name:'Asana',key:'asana'},
+      {icon:'🎵',name:'Sonido',key:'sonido'},
+      {icon:'🗣️',name:'Práctica',key:'practica'}
+    ],
+    recipes:{
+      cristal:{title:'Cristal: Aguamarina o Lapislázuli',sub:'Liberación de la voz y la verdad interior',steps:['Usa el cristal como collar o colócalo sobre la garganta durante la meditación.','Visualiza una luz azul brillante llenando y expandiendo toda la zona del cuello.','Afirma: "Mi garganta está libre. Mi verdad fluye con claridad y poder."','La Aguamarina es especialmente útil antes de conversaciones difíciles o presentaciones.']},
+      aceite:{title:'Aceite: Menta o Eucalipto',sub:'Apertura y claridad de la expresión',steps:['Mezcla 2 gotas en aceite portador. Aplica suavemente en el cuello y garganta.','Evita el área cercana a los ojos. No uses directamente en la piel sin diluir.','Inhala el vapor del aceite: abre vías respiratorias y clarifica la mente.','Combina con humming (tarareo) suave para activar la vibración del centro.']},
+      asana:{title:'Asana: Sarvangasana (Vela) o Matsyasana (Pez)',sub:'Estimulación directa del centro de la garganta',steps:['Matsyasana: Acuéstate boca arriba. Eleva el pecho arqueando la espalda.','Apoya la coronilla en el suelo. Siente el estiramiento en la garganta y el cuello.','Mantén 5-8 respiraciones largas y conscientes por la nariz.','Visualiza luz azul llenando y liberando cualquier tensión en el área de la garganta.']},
+      sonido:{title:'Sonido: Mantra HAM + Humming',sub:'Activación de la vibración vocal sagrada',steps:['Siéntate. Lleva los dedos suavemente a la garganta para sentir la vibración.','Entona "HAAAAM" con voz clara y resonante. Siente el zumbido en el cuello.','Luego practica el Humming: cierra la boca y entona "Mmmmm" variando el tono.','Repite 7 ciclos. Observa cómo se libera la tensión y se activa la claridad vocal.']},
+      practica:{title:'Práctica: La Verdad Incómoda',sub:'Entrenamiento del coraje comunicativo',steps:['Identifica algo verdadero que llevas callando por miedo al conflicto o al juicio.','Escríbelo con precisión: "La verdad que necesito expresar es..."','Practica diciéndolo en voz alta solo/a primero, con presencia y sin disculpas.','Cuando estés listo/a, compártelo con la persona relevante desde el corazón abierto.']}
+    }
+  },
+  {
+    idx:5,name:'Tercer Ojo',sk:'Ajna',col:'#6C5CE7',
+    esencia:'El centro de la percepción interior, la intuición y la claridad de visión. Aquí reside la capacidad de ver más allá de la superficie, de confiar en el conocimiento que llega más allá de la lógica, de discernir la verdad en un mundo lleno de ilusión.',
+    symptoms:['Confusión mental o indecisión crónica','Desconexión de la intuición propia','Dificultad para visualizar o soñar','Dolores de cabeza frecuentes o presión entre los ojos','Racionalismo excesivo que bloquea el sentir'],
+    mantra:'"Confío en mi visión interior. Mi intuición me guía con claridad y precisión."',
+    elem:'Luz · Nota La (A) · 426 Hz',
+    colorFreq:'Índigo · Frecuencia 852 Hz (despertar de la intuición)',
+    tools:[
+      {icon:'💎',name:'Cristal',key:'cristal'},
+      {icon:'🌿',name:'Aceite',key:'aceite'},
+      {icon:'🧘',name:'Asana',key:'asana'},
+      {icon:'🎵',name:'Sonido',key:'sonido'},
+      {icon:'👁️',name:'Práctica',key:'practica'}
+    ],
+    recipes:{
+      cristal:{title:'Cristal: Amatista o Labradorita',sub:'Amplificador de la percepción intuitiva',steps:['Coloca el cristal en el entrecejo (tercer ojo) durante meditaciones de 10-15 minutos.','Visualiza un punto de luz índigo entre tus cejas expandiéndose con cada respiración.','No fuerces visiones — simplemente observa con mente abierta lo que emerge.','La Labradorita es ideal para momentos de confusión: ayuda a distinguir lo esencial de lo superfluo.']},
+      aceite:{title:'Aceite: Incienso o Sándalo',sub:'Profundización de la meditación y la visión',steps:['Aplica 1 gota diluida suavemente en el entrecejo con el dedo anular (dedo del alma).','O usa en difusor durante la meditación para crear un ambiente propicio.','El Incienso conecta con lo sagrado; el Sándalo centra y silencia el ruido mental.','Combina con meditación de foco interno o contemplación de mandalas o yantras.']},
+      asana:{title:'Asana: Balasana (Niño) con frente al suelo',sub:'Estimulación del punto del tercer ojo',steps:['Arrodíllate. Siéntate sobre los talones. Inclínate hacia adelante con los brazos extendidos.','Permite que la frente (zona del tercer ojo) descanse suavemente en el suelo o en un bloque.','La presión suave activa el punto de acupresión del tercer ojo.','Permanece 8-12 respiraciones. Observa el espacio interior que surge en el silencio.']},
+      sonido:{title:'Sonido: Mantra OM / AUM',sub:'El sonido primordial del despertar',steps:['Siéntate en postura cómoda. Cierra los ojos. Lleva la atención al entrecejo.','Inhala profundamente. Al exhalar, entona "AAAAAUUUUMMM" en tres fases bien diferenciadas.','Siente la vibración resonar en el cráneo y en el punto entre las cejas.','Repite 9 veces. Al finalizar, permanece en silencio y observa la pantalla del tercer ojo.']},
+      practica:{title:'Práctica: Diario de Sueños e Intuiciones',sub:'Registro del lenguaje del tercer ojo',steps:['Ten un cuaderno y bolígrafo junto a tu cama. Al despertar, antes de levantarte...','Escribe todo lo que recuerdes del sueño: imágenes, colores, sensaciones, personajes.','Durante el día, registra también los momentos de "corazonada" y qué resultado tuvieron.','Con el tiempo, comenzarás a ver patrones en el lenguaje de tu intuición propia.']}
+    }
+  },
+  {
+    idx:6,name:'Coronilla',sk:'Sahasrara',col:'#9B59B6',
+    esencia:'El loto de mil pétalos que conecta el ser individual con la conciencia universal. Aquí reside la experiencia de la unidad, el silencio profundo más allá del pensamiento, la comprensión de que eres tanto humano como divino al mismo tiempo.',
+    symptoms:['Sensación de estar perdido/a en la vida','Ausencia de sentido o propósito profundo','Dogmatismo o desconexión espiritual','Sensación de separación del todo','Depresión existencial o nihilismo'],
+    mantra:'"Soy uno/a con todo lo que existe. Estoy guiado/a por la inteligencia divina del universo."',
+    elem:'Pensamiento puro / Conciencia · Nota Si (B) · 480 Hz',
+    colorFreq:'Violeta / Blanco · Frecuencia 963 Hz (conciencia divina)',
+    tools:[
+      {icon:'💎',name:'Cristal',key:'cristal'},
+      {icon:'🌿',name:'Aceite',key:'aceite'},
+      {icon:'🧘',name:'Asana',key:'asana'},
+      {icon:'🎵',name:'Sonido',key:'sonido'},
+      {icon:'✨',name:'Práctica',key:'practica'}
+    ],
+    recipes:{
+      cristal:{title:'Cristal: Cuarzo Transparente o Selenita',sub:'Amplificador de la conciencia superior',steps:['Sostén el cristal sobre la coronilla (cima de la cabeza) en meditación horizontal.','Visualiza un haz de luz blanca o violeta entrando por la coronilla y llenando todo tu ser.','No busques experiencias extraordinarias — el más profundo estado es el de la quietud simple.','La Selenita es ideal: conecta rápidamente con frecuencias elevadas y limpia el aura.']},
+      aceite:{title:'Aceite: Mirra o Flor de Loto',sub:'Elevación de la conciencia y conexión divina',steps:['Aplica 1 gota diluida en la coronilla con el dedo anular en meditación.','O úsalo en difusor durante prácticas de contemplación o lectura espiritual.','La Mirra ha sido usada en rituales sagrados de todas las tradiciones por milenios.','Combina con silencio total: apaga todo dispositivo y siéntate en quietud completa.']},
+      asana:{title:'Asana: Sirsasana (Parada de Cabeza) o Savasana',sub:'Inversión o rendición total al universo',steps:['Si practicas inversiones: Sirsasana estimula directamente la coronilla con la presión.','Si prefieres: Savasana — acuéstate completamente inmóvil, brazos a los lados.','Rinde completamente el peso del cuerpo. No hay nada que hacer, ningún lugar a donde ir.','Permanece mínimo 10-15 minutos. El Savasana es la asana más avanzada y transformadora.']},
+      sonido:{title:'Sonido: Silencio + Cuenco Tibetano',sub:'El sonido que abre la puerta del absoluto',steps:['Siéntate. Cierra los ojos. Respira lentamente hasta que la mente empiece a calmarse.','Si tienes cuenco: hazlo sonar sobre tu cabeza y escucha el sonido hasta que desaparezca por completo.','Sin cuenco: escucha el "sonido del silencio" — ese tono suave siempre presente.','Permanece en ese espacio sin nombres ni pensamientos el mayor tiempo posible.']},
+      practica:{title:'Práctica: Meditación de Gratitud Universal',sub:'Disolución del yo en el todo',steps:['Siéntate cómodamente. Cierra los ojos. Respira 10 veces profundamente.','Comienza a sentir gratitud por algo pequeño. Luego expándela: por tu cuerpo, tu vida...','Expande más: gratitud por los desafíos, por las personas difíciles, por la dualidad.','Finalmente, siente gratitud por existir. Por ser consciencia teniendo esta experiencia humana.']}
+    }
+  }
+];
+
+// Estado
+let chActive=null,chHover=null;
+
+// ── Canvas con hover de escaneo ──
+const chC=$('ch-canvas'),chX=chC.getContext('2d');
+const chColors=CH_DATA.map(d=>d.col);
+const chPos=[460,398,335,248,190,135,76]; // Y en canvas
+const chNames=['Raíz','Sacro','Plexo Solar','Corazón','Garganta','Tercer Ojo','Coronilla'];
+
+function drawCh(){
+  chX.clearRect(0,0,270,520);
+  // Silueta corporal
+  chX.beginPath();chX.ellipse(135,300,52,190,0,0,6.28);chX.fillStyle='rgba(18,10,46,.4)';chX.fill();chX.strokeStyle='rgba(201,168,76,.12)';chX.lineWidth=1.4;chX.stroke();
+  chX.beginPath();chX.ellipse(135,78,40,50,0,0,6.28);chX.fillStyle='rgba(18,10,46,.4)';chX.fill();chX.strokeStyle='rgba(201,168,76,.12)';chX.lineWidth=1.4;chX.stroke();
+  // Canal central
+  const cg=chX.createLinearGradient(135,88,135,468);
+  chColors.forEach((c,i)=>cg.addColorStop(i/6,c+'28'));
+  chX.beginPath();chX.moveTo(135,88);chX.lineTo(135,468);chX.strokeStyle=cg;chX.lineWidth=1.8;chX.stroke();
+  // Chakras
+  chPos.forEach((y,i)=>{
+    const idx=6-i,col=chColors[idx];
+    const isActive=chActive===idx,isHover=chHover===idx;
+    const pr=isActive?18+4*Math.sin(Date.now()*.005):isHover?15:11;
+    // Aura exterior
+    const ag=chX.createRadialGradient(135,y,0,135,y,pr*2.6);
+    const alpha=isActive?.65:isHover?.45:.3;
+    ag.addColorStop(0,col+(isActive?'55':'33'));ag.addColorStop(1,'transparent');
+    chX.fillStyle=ag;chX.beginPath();chX.arc(135,y,pr*2.6,0,6.28);chX.fill();
+    // Círculo principal
+    chX.beginPath();chX.arc(135,y,pr,0,6.28);
+    if(isActive){const g=chX.createRadialGradient(135,y,0,135,y,pr);g.addColorStop(0,'white');g.addColorStop(.4,col);g.addColorStop(1,col+'aa');chX.fillStyle=g}
+    else{chX.fillStyle=col}
+    chX.fill();
+    chX.strokeStyle=isActive?'rgba(255,255,255,.6)':'rgba(255,255,255,.2)';
+    chX.lineWidth=isActive?1.5:.8;chX.stroke();
+    // Pulso de hover
+    if(isHover&&!isActive){chX.beginPath();chX.arc(135,y,pr+5,0,6.28);chX.strokeStyle=col+'80';chX.lineWidth=1;chX.stroke()}
+  });
+  requestAnimationFrame(drawCh);
+}
+requestAnimationFrame(drawCh);
+
+// Hover sobre canvas → etiqueta flotante
+chC.addEventListener('mousemove',e=>{
+  const rect=chC.getBoundingClientRect();
+  const my=e.clientY-rect.top;
+  const mx=e.clientX-rect.left;
+  let found=-1;
+  chPos.forEach((y,i)=>{const idx=6-i;const dist=Math.sqrt((mx-135)**2+(my-y)**2);if(dist<22)found=idx});
+  const lbl=$('ch-hover-lbl');
+  if(found>=0){
+    chHover=found;
+    lbl.textContent=CH_DATA[found].sk+' · '+chNames[found];
+    lbl.style.left=(mx+14)+'px';lbl.style.top=(my-12)+'px';
+    lbl.classList.add('show');
+    chC.style.cursor='pointer';
+  }else{
+    chHover=null;lbl.classList.remove('show');chC.style.cursor='crosshair';
+  }
+});
+chC.addEventListener('mouseleave',()=>{chHover=null;$('ch-hover-lbl').classList.remove('show')});
+chC.addEventListener('click',e=>{
+  const rect=chC.getBoundingClientRect();
+  const my=e.clientY-rect.top,mx=e.clientX-rect.left;
+  chPos.forEach((y,i)=>{const idx=6-i;const dist=Math.sqrt((mx-135)**2+(my-y)**2);if(dist<22)openChakra(idx)});
+});
+
+// ── Apertura de panel de detalle ──
+function openChakra(i){
+  chActive=i;
+  document.querySelectorAll('.chi').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('[data-chi="'+i+'"]').forEach(el=>el.classList.add('on'));
+  const d=CH_DATA[i];
+  // Header
+  $('ch-det-orb').style.background=d.col;
+  $('ch-det-orb').style.boxShadow='0 0 22px '+d.col+'88';
+  $('ch-det-sk').textContent=d.sk;
+  $('ch-det-name').textContent=d.name;
+  // Body
+  $('ch-det-esencia').textContent=d.esencia;
+  const symp=$('ch-det-symptoms');symp.innerHTML='';
+  d.symptoms.forEach(s=>{const p=document.createElement('p');p.className='ch-det-symptom';p.textContent=s;symp.appendChild(p)});
+  $('ch-det-mantra').textContent=d.mantra;
+  $('ch-det-elem').textContent=d.elem;
+  $('ch-det-color').textContent=d.colorFreq;
+  // Herramientas
+  const tg=$('ch-tools-grid');tg.innerHTML='';
+  d.tools.forEach(t=>{
+    const b=document.createElement('button');b.className='ch-tool';
+    b.innerHTML='<span class="ch-tool-icon">'+t.icon+'</span><span class="ch-tool-name">'+t.name+'</span>';
+    b.onclick=()=>openRecipe(i,t.key,b);
+    tg.appendChild(b);
+  });
+  // Ocultar receta anterior
+  $('ch-recipe').classList.remove('show');
+  // Mostrar panel
+  const det=$('ch-detail');det.classList.remove('show');void det.offsetWidth;det.classList.add('show');
+  setTimeout(()=>det.scrollIntoView({behavior:'smooth',block:'nearest'}),300);
+}
+
+function closeChakra(){
+  chActive=null;
+  document.querySelectorAll('.chi').forEach(el=>el.classList.remove('on'));
+  $('ch-detail').classList.remove('show');
+}
+
+// ── Receta de bienestar ──
+function openRecipe(chakraIdx,toolKey,btn){
+  document.querySelectorAll('.ch-tool').forEach(b=>b.classList.remove('active-tool'));
+  btn.classList.add('active-tool');
+  const rec=CH_DATA[chakraIdx].recipes[toolKey];
+  if(!rec)return;
+  $('ch-recipe-title').textContent=rec.title;
+  $('ch-recipe-sub').textContent=rec.sub;
+  const steps=$('ch-recipe-steps');steps.innerHTML='';
+  rec.steps.forEach((s,i)=>{
+    const div=document.createElement('div');div.className='ch-recipe-step';
+    div.innerHTML='<span class="ch-recipe-step-n">0'+(i+1)+'</span><span class="ch-recipe-step-txt">'+s+'</span>';
+    steps.appendChild(div);
+  });
+  const r=$('ch-recipe');r.classList.remove('show');void r.offsetWidth;r.classList.add('show');
+  setTimeout(()=>r.scrollIntoView({behavior:'smooth',block:'nearest'}),200);
+}
+
+// ── Autodiagnóstico ──
+let diagSel=[];
+document.querySelectorAll('.ch-dtag').forEach(tag=>{
+  tag.addEventListener('click',()=>{
+    const idx=tag.dataset.chakras;
+    if(tag.classList.contains('sel')){
+      tag.classList.remove('sel');
+      diagSel=diagSel.filter(x=>x!==tag);
+    }else{
+      if(diagSel.length>=3)return;
+      tag.classList.add('sel');
+      diagSel.push(tag);
+    }
+    const n=diagSel.length;
+    $('ch-diag-hint').textContent=n+' / 3 seleccionados';
+    $('ch-diag-btn').classList.toggle('ready',n>0);
+  });
+});
+
+function runDiag(){
+  if(diagSel.length===0)return;
+  // Contar chakras seleccionados
+  const count={};
+  diagSel.forEach(t=>{const k=t.dataset.chakras;count[k]=(count[k]||0)+1});
+  // Chakra con mayor frecuencia
+  let topKey='0',topVal=0;
+  Object.entries(count).forEach(([k,v])=>{if(v>topVal){topVal=v;topKey=k}});
+  const targetIdx=parseInt(topKey);
+  // Highlight visual
+  document.querySelectorAll('.chi').forEach(el=>{
+    const chi=parseInt(el.dataset.chi);
+    el.classList.remove('diag-match','diag-dim');
+    if(chi===targetIdx){
+      el.style.setProperty('--ch-color',CH_DATA[targetIdx].col+'99');
+      el.classList.add('diag-match');
+    }else{
+      el.classList.add('diag-dim');
+    }
+  });
+  // Abrir detalle
+  setTimeout(()=>{
+    openChakra(targetIdx);
+    document.getElementById('chakras').scrollIntoView({behavior:'smooth',block:'start'});
+    // Limpiar dim después
+    setTimeout(()=>{
+      document.querySelectorAll('.chi').forEach(el=>el.classList.remove('diag-dim'));
+    },3500);
+  },600);
+}
+
+// compatibilidad con llamada antigua si existía
+function activChakra(i){openChakra(i)}
+
+// ═══════════════════════════════════════
+// TAROT — DECK COMPLETO 78 CARTAS + TIRADAS
+// ═══════════════════════════════════════
+const RWS='https://raw.githubusercontent.com/seven102161/elaine-tarot-cards/main/cards/';
+const RWS_MAP={0:'ar00.jpg',1:'ar01.jpg',2:'ar02.jpg',3:'ar03.jpg',4:'ar04.jpg',5:'ar05.jpg',6:'ar06.jpg',7:'ar07.jpg',8:'ar08.jpg',9:'ar09.jpg',10:'ar10.jpg',11:'ar11.jpg',12:'ar12.jpg',13:'ar13.jpg',14:'ar14.jpg',15:'ar15.jpg',16:'ar16.jpg',17:'ar17.jpg',18:'ar18.jpg',19:'ar19.jpg',20:'ar20.jpg',21:'ar21.jpg',22:'waac.jpg',23:'wa02.jpg',24:'wa03.jpg',25:'wa04.jpg',26:'wa05.jpg',27:'wa06.jpg',28:'wa07.jpg',29:'wa08.jpg',30:'wa09.jpg',31:'wa10.jpg',32:'wapa.jpg',33:'wakn.jpg',34:'waqu.jpg',35:'waki.jpg',36:'cuac.jpg',37:'cu02.jpg',38:'cu03.jpg',39:'cu04.jpg',40:'cu05.jpg',41:'cu06.jpg',42:'cu07.jpg',43:'cu08.jpg',44:'cu09.jpg',45:'cu10.jpg',46:'cupa.jpg',47:'cukn.jpg',48:'cuqu.jpg',49:'cuki.jpg',50:'swac.jpg',51:'sw02.jpg',52:'sw03.jpg',53:'sw04.jpg',54:'sw05.jpg',55:'sw06.jpg',56:'sw07.jpg',57:'sw08.jpg',58:'sw09.jpg',59:'sw10.jpg',60:'swpa.jpg',61:'swkn.jpg',62:'swqu.jpg',63:'swki.jpg',64:'peac.jpg',65:'pe02.jpg',66:'pe03.jpg',67:'pe04.jpg',68:'pe05.jpg',69:'pe06.jpg',70:'pe07.jpg',71:'pe08.jpg',72:'pe09.jpg',73:'pe10.jpg',74:'pepa.jpg',75:'pekn.jpg',76:'pequ.jpg',77:'peki.jpg'};
+const DECK=[
+  {id:0,n:'El Loco',g:'🃏',t:'mayor',p:'',k:'Libertad'},{id:1,n:'El Mago',g:'🎩',t:'mayor',p:'',k:'Voluntad'},{id:2,n:'La Papisa',g:'📖',t:'mayor',p:'',k:'Sabiduría'},{id:3,n:'La Emperatriz',g:'👑',t:'mayor',p:'',k:'Abundancia'},{id:4,n:'El Emperador',g:'⚔️',t:'mayor',p:'',k:'Poder'},{id:5,n:'El Papa',g:'✝️',t:'mayor',p:'',k:'Tradición'},{id:6,n:'El Enamorado',g:'💘',t:'mayor',p:'',k:'Elección'},{id:7,n:'El Carro',g:'🏆',t:'mayor',p:'',k:'Triunfo'},{id:8,n:'La Justicia',g:'⚖️',t:'mayor',p:'',k:'Equilibrio'},{id:9,n:'El Ermitaño',g:'🏮',t:'mayor',p:'',k:'Soledad'},{id:10,n:'La Rueda',g:'☸️',t:'mayor',p:'',k:'Ciclos'},{id:11,n:'La Fuerza',g:'🦁',t:'mayor',p:'',k:'Poder suave'},{id:12,n:'El Colgado',g:'🙃',t:'mayor',p:'',k:'Rendición'},{id:13,n:'La Muerte',g:'💀',t:'mayor',p:'',k:'Transformación'},{id:14,n:'La Templanza',g:'🏺',t:'mayor',p:'',k:'Alquimia'},{id:15,n:'El Diablo',g:'😈',t:'mayor',p:'',k:'Sombra'},{id:16,n:'La Torre',g:'🗼',t:'mayor',p:'',k:'Revelación'},{id:17,n:'La Estrella',g:'⭐',t:'mayor',p:'',k:'Esperanza'},{id:18,n:'La Luna',g:'🌕',t:'mayor',p:'',k:'Ilusión'},{id:19,n:'El Sol',g:'☀️',t:'mayor',p:'',k:'Claridad'},{id:20,n:'El Juicio',g:'📯',t:'mayor',p:'',k:'Llamado'},{id:21,n:'El Mundo',g:'🌍',t:'mayor',p:'',k:'Totalidad'},
+  {id:22,n:'As de Bastos',g:'🪄',t:'menor',p:'bastos',k:'Inicio'},{id:23,n:'Dos de Bastos',g:'🔥',t:'menor',p:'bastos',k:'Visión'},{id:24,n:'Tres de Bastos',g:'🌟',t:'menor',p:'bastos',k:'Expansión'},{id:25,n:'Cuatro de Bastos',g:'🎊',t:'menor',p:'bastos',k:'Celebración'},{id:26,n:'Cinco de Bastos',g:'⚡',t:'menor',p:'bastos',k:'Conflicto'},{id:27,n:'Seis de Bastos',g:'🏅',t:'menor',p:'bastos',k:'Victoria'},{id:28,n:'Siete de Bastos',g:'🥊',t:'menor',p:'bastos',k:'Defensa'},{id:29,n:'Ocho de Bastos',g:'💨',t:'menor',p:'bastos',k:'Velocidad'},{id:30,n:'Nueve de Bastos',g:'🎯',t:'menor',p:'bastos',k:'Resistencia'},{id:31,n:'Diez de Bastos',g:'😓',t:'menor',p:'bastos',k:'Carga'},{id:32,n:'Paje de Bastos',g:'🧒',t:'menor',p:'bastos',k:'Mensajero'},{id:33,n:'Caballo de Bastos',g:'🏇',t:'menor',p:'bastos',k:'Ímpetu'},{id:34,n:'Reina de Bastos',g:'👸',t:'menor',p:'bastos',k:'Carisma'},{id:35,n:'Rey de Bastos',g:'🤴',t:'menor',p:'bastos',k:'Liderazgo'},
+  {id:36,n:'As de Copas',g:'🏆',t:'menor',p:'copas',k:'Amor puro'},{id:37,n:'Dos de Copas',g:'💑',t:'menor',p:'copas',k:'Unión'},{id:38,n:'Tres de Copas',g:'🥂',t:'menor',p:'copas',k:'Alegría'},{id:39,n:'Cuatro de Copas',g:'😔',t:'menor',p:'copas',k:'Contemplación'},{id:40,n:'Cinco de Copas',g:'😢',t:'menor',p:'copas',k:'Pérdida'},{id:41,n:'Seis de Copas',g:'🌸',t:'menor',p:'copas',k:'Nostalgia'},{id:42,n:'Siete de Copas',g:'💭',t:'menor',p:'copas',k:'Ilusión'},{id:43,n:'Ocho de Copas',g:'🚶',t:'menor',p:'copas',k:'Abandono'},{id:44,n:'Nueve de Copas',g:'😊',t:'menor',p:'copas',k:'Deseo'},{id:45,n:'Diez de Copas',g:'👨‍👩‍👧',t:'menor',p:'copas',k:'Plenitud'},{id:46,n:'Paje de Copas',g:'🧒',t:'menor',p:'copas',k:'Intuición'},{id:47,n:'Caballo de Copas',g:'🐟',t:'menor',p:'copas',k:'Propuesta'},{id:48,n:'Reina de Copas',g:'👸',t:'menor',p:'copas',k:'Empatía'},{id:49,n:'Rey de Copas',g:'🤴',t:'menor',p:'copas',k:'Sabiduría'},
+  {id:50,n:'As de Espadas',g:'⚔️',t:'menor',p:'espadas',k:'Verdad'},{id:51,n:'Dos de Espadas',g:'🤝',t:'menor',p:'espadas',k:'Tregua'},{id:52,n:'Tres de Espadas',g:'💔',t:'menor',p:'espadas',k:'Dolor'},{id:53,n:'Cuatro de Espadas',g:'🛏️',t:'menor',p:'espadas',k:'Reposo'},{id:54,n:'Cinco de Espadas',g:'😤',t:'menor',p:'espadas',k:'Derrota'},{id:55,n:'Seis de Espadas',g:'⛵',t:'menor',p:'espadas',k:'Transición'},{id:56,n:'Siete de Espadas',g:'🦹',t:'menor',p:'espadas',k:'Engaño'},{id:57,n:'Ocho de Espadas',g:'⛓️',t:'menor',p:'espadas',k:'Restricción'},{id:58,n:'Nueve de Espadas',g:'😱',t:'menor',p:'espadas',k:'Ansiedad'},{id:59,n:'Diez de Espadas',g:'🗡️',t:'menor',p:'espadas',k:'Fin'},{id:60,n:'Paje de Espadas',g:'🧒',t:'menor',p:'espadas',k:'Vigilancia'},{id:61,n:'Caballo de Espadas',g:'🏇',t:'menor',p:'espadas',k:'Impulso'},{id:62,n:'Reina de Espadas',g:'👸',t:'menor',p:'espadas',k:'Claridad'},{id:63,n:'Rey de Espadas',g:'🤴',t:'menor',p:'espadas',k:'Autoridad'},
+  {id:64,n:'As de Oros',g:'🪙',t:'menor',p:'oros',k:'Manifestación'},{id:65,n:'Dos de Oros',g:'🤹',t:'menor',p:'oros',k:'Equilibrio'},{id:66,n:'Tres de Oros',g:'🎨',t:'menor',p:'oros',k:'Maestría'},{id:67,n:'Cuatro de Oros',g:'💰',t:'menor',p:'oros',k:'Posesión'},{id:68,n:'Cinco de Oros',g:'🙇',t:'menor',p:'oros',k:'Necesidad'},{id:69,n:'Seis de Oros',g:'🤲',t:'menor',p:'oros',k:'Generosidad'},{id:70,n:'Siete de Oros',g:'🌱',t:'menor',p:'oros',k:'Paciencia'},{id:71,n:'Ocho de Oros',g:'🔨',t:'menor',p:'oros',k:'Trabajo'},{id:72,n:'Nueve de Oros',g:'🏠',t:'menor',p:'oros',k:'Independencia'},{id:73,n:'Diez de Oros',g:'👨‍👩‍👦',t:'menor',p:'oros',k:'Herencia'},{id:74,n:'Paje de Oros',g:'🧒',t:'menor',p:'oros',k:'Estudio'},{id:75,n:'Caballo de Oros',g:'🏇',t:'menor',p:'oros',k:'Constancia'},{id:76,n:'Reina de Oros',g:'👸',t:'menor',p:'oros',k:'Prosperidad'},{id:77,n:'Rey de Oros',g:'🤴',t:'menor',p:'oros',k:'Éxito'}
+];
+const TIRADAS={
+  unica:{n:'Carta Única',c:1,pos:['El Mensaje del Día']},
+  tres:{n:'Pasado · Presente · Futuro',c:3,pos:['Pasado','Presente','Futuro']},
+  cinco:{n:'Cruz Celta',c:5,pos:['La Situación','El Obstáculo','El Fundamento','El Camino','El Resultado']},
+  siete:{n:'Herradura',c:7,pos:['Pasado lejano','Pasado reciente','Presente','Ext. externas','Esperanzas','Lo oculto','Resultado']},
+  elem:{n:'Los 4 Elementos',c:4,pos:['🔥 Fuego','🌿 Tierra','🌬️ Aire','🌊 Agua']}
+};
+
+function shuffle(arr){return arr.slice().sort(()=>Math.random()-.5)}
+
+let tiradaActiva='unica',selCards=[],mazo=shuffle([...DECK]);
+const BACK_SVG=`<svg viewBox="0 0 65 96" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%"><rect width="65" height="96" fill="#120830"/><rect x="3" y="3" width="59" height="90" fill="none" stroke="rgba(201,168,76,.38)" stroke-width=".8"/><rect x="6" y="6" width="53" height="84" fill="none" stroke="rgba(201,168,76,.18)" stroke-width=".5"/><polygon points="32.5,11 39,28 56,28 43,38 48,54 32.5,44 17,54 22,38 9,28 26,28" fill="none" stroke="rgba(201,168,76,.32)" stroke-width=".8"/><circle cx="32.5" cy="48" r="18" fill="none" stroke="rgba(201,168,76,.13)" stroke-width=".5" stroke-dasharray="2,2"/><text x="32.5" y="51" text-anchor="middle" font-size="7" fill="rgba(201,168,76,.45)" font-family="serif">✦</text><text x="32.5" y="86" text-anchor="middle" font-size="4.5" fill="rgba(201,168,76,.28)" font-family="serif" letter-spacing="1">TA·ROD</text></svg>`;
+function rwsImg(id,styles){const fn=RWS_MAP[id];if(!fn)return'<div style="'+styles+'font-size:1.5rem;display:flex;align-items:center;justify-content:center;background:#1A0A30">'+DECK[id].g+'</div>';return'<img src="'+RWS+fn+'" style="'+styles+'object-fit:cover;display:block" loading="lazy" onerror="this.style.display=\'none\'">';}
+function selTirada(k,btn){
+  tiradaActiva=k;
+  document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  selCards=[];
+  mazo=shuffle([...DECK]); // Baraja automáticamente al cambiar tirada
+  updateInfo();renderDeck();
+  $('tirada-result').classList.remove('show');
+  updateRevealBtn();
+}
+function updateInfo(){const t=TIRADAS[tiradaActiva];$('t-info').innerHTML='<em>'+{unica:'La energía más importante ahora',tres:'La línea del tiempo de tu situación',cinco:'Análisis profundo de las fuerzas en juego',siete:'Visión completa del panorama de tu vida',elem:'Cómo fluye la energía elemental en ti'}[tiradaActiva]+'</em> — Selecciona <strong id="t-need">'+t.c+' carta'+(t.c>1?'s':'')+'</strong>'}
+function renderDeck(){
+  const dp=$('deck-picker');dp.innerHTML='';
+  mazo.forEach(card=>{
+    const d=document.createElement('div');d.className='dmc';d.id='dmc-'+card.id;d.title=card.n+' · '+card.k;
+    d.innerHTML='<div class="dmc-inner"><div class="dface dback">'+BACK_SVG+'</div><div class="dface dfront">'+rwsImg(card.id,'width:100%;flex:1;min-height:0;')+'<div class="dfront-label">'+card.n+'</div></div></div>';
+    d.onclick=()=>toggleCard(card,d);
+    dp.appendChild(d);
+  });
+}
+function toggleCard(card,el){
+  const max=TIRADAS[tiradaActiva].c,idx=selCards.findIndex(c=>c.id===card.id);
+  if(idx>=0){selCards.splice(idx,1);el.classList.remove('sel')}
+  else{if(selCards.length>=max){const old=selCards.shift();$('dmc-'+old.id)?.classList.remove('sel')}selCards.push(card);el.classList.add('sel')}
+  updateRevealBtn();
+}
+function updateRevealBtn(){const btn=$('btn-reveal');const ok=selCards.length===TIRADAS[tiradaActiva].c;btn.disabled=!ok}
+function shuffleDeck(){
+  // Animación visual de barajado
+  const dp=$('deck-picker');
+  dp.style.opacity='.3';dp.style.transform='scale(.97)';dp.style.transition='all .28s';
+  setTimeout(()=>{
+    mazo=shuffle([...DECK]);selCards=[];
+    $('tirada-result').classList.remove('show');
+    renderDeck();updateRevealBtn();
+    dp.style.opacity='1';dp.style.transform='scale(1)';
+  },280);
+}
+function resetTirada(){
+  selCards=[];
+  mazo=shuffle([...DECK]);
+  $('tirada-result').classList.remove('show');
+  renderDeck();updateRevealBtn();
+}
+function doReveal(){
+  const t=TIRADAS[tiradaActiva],res=$('tirada-result');
+  $('tr-cards').innerHTML=selCards.map((c,i)=>'<div class="tr-card"><div class="tr-cv">'+rwsImg(c.id,'width:100%;height:100%;')+'</div><span class="tr-pos">'+t.pos[i]+'</span></div>').join('');
+  const interps={bastos:'Bastos enciende el fuego de la acción. Actúa desde el coraje genuino.',copas:'Copas llevan el flujo emocional. Honra lo que sientes sin filtrarlo.',espadas:'Espadas aportan claridad mental. Corta lo que no sirve con precisión.',oros:'Oros anclan la energía material. Recursos, cuerpo y manifestación tangible.'};
+  $('tr-interp').innerHTML='<p class="tr-interp-title">✦ Lectura · '+t.n+' ✦</p>'+selCards.map((c,i)=>{const mj=ARCANOS_DATA.find(a=>a.n===c.n);const txt=mj?'En la posición de "'+t.pos[i]+'": '+mj.tirada:c.n+' ('+c.k+') en "'+t.pos[i]+'": '+interps[c.p];return'<div class="tr-row">'+rwsImg(c.id,'width:70px;height:105px;border-radius:2px;box-shadow:0 2px 8px rgba(0,0,0,.5);flex-shrink:0;')+'<div><p class="tr-card-name">'+c.n+'</p><span class="tr-card-pos">'+t.pos[i]+'</span><p class="tr-card-txt">'+txt+'</p></div></div>'}).join('');
+  res.classList.add('show');setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+function resetTirada(){selCards=[];document.querySelectorAll('.dmc').forEach(c=>c.classList.remove('sel'));$('tirada-result').classList.remove('show');updateRevealBtn();$('deck-picker').scrollIntoView({behavior:'smooth',block:'center'})}
+renderDeck();updateInfo();
+
+// ═══════════════════════════════════════
+// ALTAR DE FUEGO
+// ═══════════════════════════════════════
+const fC=$('fire-canvas'),fX=fC.getContext('2d');
+let fParts=[],fOn=false;
+class FP{constructor(x){this.x=x+(Math.random()-.5)*55;this.y=170;this.vx=(Math.random()-.5)*1.4;this.vy=-(Math.random()*2+1.4);this.life=1;this.decay=.01+Math.random()*.012;this.sz=Math.random()*8+3}
+update(){this.x+=this.vx+(Math.random()-.5)*.4;this.y+=this.vy;this.vy-=.028;this.life-=this.decay;this.sz*=.982}
+draw(){fX.beginPath();fX.arc(this.x,this.y,this.sz,0,6.28);fX.fillStyle='rgba(255,'+Math.floor(this.life*130)+',0,'+this.life*.78+')';fX.fill()}}
+let fT=0;
+(function animFire(){fX.clearRect(0,0,680,180);if(fOn&&fT++%2===0)for(let i=0;i<4;i++){const fl=new FP(340);fParts.push(fl)}
+fParts=fParts.filter(p=>p.life>0);fParts.forEach(p=>{p.update();p.draw()});requestAnimationFrame(animFire)})();
+function burnIt(){const txt=$('altar-txt').value.trim();if(!txt)return;fOn=true;const ta=$('altar-txt');ta.style.transition='opacity 1.5s';ta.style.opacity='0';setTimeout(()=>{ta.value='';ta.style.opacity='1';fOn=false;const msg=$('altar-msg');msg.classList.add('show');setTimeout(()=>msg.classList.remove('show'),5000)},2500)}
+
+// ═══════════════════════════════════════
+// MODAL AGENDAR
+// ═══════════════════════════════════════
+function openModal(svc){
+  const labels={carta:['Carta Natal + Tarot','Lectura profunda de tu mapa estelar y los arquetipos'],pend:['Alineación con Péndulo','Diagnóstico y reequilibrio de tu campo energético'],limpieza:['Limpieza Chamánica','Ritual sagrado de transmutación y apertura de caminos']};
+  const l=labels[svc]||['Agendar Sesión','Completa tus datos para reservar tu espacio sagrado'];
+  $('m-title').textContent=l[0];$('m-sub').textContent=l[1];
+  if(svc&&$('m-svc'))$('m-svc').value=svc;
+  $('modal-ov').classList.add('on');
+  document.body.style.overflow='hidden';
+  initCal();
+}
+function closeModal(){$('modal-ov').classList.remove('on');document.body.style.overflow=''}
+function confirmBook(){
+  const nombre=($('m-nombre')||{}).value||'';
+  const email=($('m-email')||{}).value||'';
+  if(!nombre||!email){alert('Por favor completa al menos tu nombre y correo.');return}
+  if(!calSelectedDate||!calSelectedSlot){alert('Por favor selecciona una fecha y hora disponible.');return}
+  const msg='✦ Reserva recibida ✦\n\nNombre: '+nombre+'\nFecha: '+calSelectedDate+'\nHora: '+calSelectedSlot+'\n\nEn breve recibirás confirmación al correo y vía WhatsApp.\n\nPuedes contactarnos al 📞 8821-5669';
+  closeModal();
+  setTimeout(()=>alert(msg),300);
+}
+
+// ═══════════════════════════════════════
+// CALENDARIO DE RESERVAS
+// ═══════════════════════════════════════
+const SLOTS=['8:00 AM','9:30 AM','11:00 AM','1:00 PM','2:30 PM','4:00 PM','5:30 PM'];
+// Slots bloqueados — simulados (en producción vendrían de un backend)
+const TAKEN_SLOTS={
+  // Formato: 'YYYY-MM-DD':['8:00 AM','11:00 AM',...]
+};
+// Días bloqueados completos (domingos por defecto)
+const BLOCKED_DAYS=[0]; // 0=domingo
+
+let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
+let calSelectedDate=null,calSelectedSlot=null;
+const CAL_MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const CAL_DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+function initCal(){calYear=new Date().getFullYear();calMonth=new Date().getMonth();calSelectedDate=null;calSelectedSlot=null;updateCalChosen();renderCal()}
+function calMove(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--}renderCal()}
+function renderCal(){
+  if(!$('cal-grid'))return;
+  $('cal-month-lbl').textContent=CAL_MONTHS[calMonth]+' '+calYear;
+  const grid=$('cal-grid');grid.innerHTML='';
+  const today=new Date();today.setHours(0,0,0,0);
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const prevDays=new Date(calYear,calMonth,0).getDate();
+  // Celdas del mes anterior
+  for(let i=0;i<firstDay;i++){
+    const c=document.createElement('div');c.className='cal-cell other-month';
+    c.textContent=prevDays-firstDay+1+i;grid.appendChild(c);
+  }
+  // Días del mes
+  for(let d=1;d<=daysInMonth;d++){
+    const c=document.createElement('div');
+    const date=new Date(calYear,calMonth,d);date.setHours(0,0,0,0);
+    const dateStr=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const isToday=date.getTime()===today.getTime();
+    const isPast=date<today;
+    const isBlocked=BLOCKED_DAYS.includes(date.getDay());
+    const isSelected=calSelectedDate===dateStr;
+    let cls='cal-cell';
+    if(isPast||isBlocked)cls+=' past';
+    else cls+=' available';
+    if(isToday)cls+=' today';
+    if(isSelected)cls+=' selected';
+    c.className=cls;c.textContent=d;
+    if(!isPast&&!isBlocked){c.onclick=()=>selectDate(dateStr,d)}
+    grid.appendChild(c);
+  }
+  // Celdas del mes siguiente
+  const remaining=(7-((firstDay+daysInMonth)%7))%7;
+  for(let i=1;i<=remaining;i++){const c=document.createElement('div');c.className='cal-cell other-month';c.textContent=i;grid.appendChild(c)}
+  // Mostrar slots si hay fecha seleccionada
+  if(calSelectedDate)showSlots(calSelectedDate);
+  else{const sr=$('cal-sel-row');if(sr)sr.style.display='none'}
+}
+function selectDate(dateStr,day){
+  calSelectedDate=dateStr;calSelectedSlot=null;
+  updateCalChosen();
+  // Highlight
+  document.querySelectorAll('.cal-cell.available,.cal-cell.today').forEach(c=>{
+    if(parseInt(c.textContent)===day&&!c.classList.contains('other-month'))
+      c.classList.add('selected');
+    else c.classList.remove('selected');
+  });
+  showSlots(dateStr);
+}
+function showSlots(dateStr){
+  const sr=$('cal-sel-row');if(!sr)return;
+  const taken=TAKEN_SLOTS[dateStr]||[];
+  const dayName=CAL_DAYS[new Date(dateStr+'T12:00:00').getDay()];
+  const [y,m,d]=dateStr.split('-');
+  $('cal-sel-lbl').textContent='Horarios disponibles — '+dayName+' '+parseInt(d)+' de '+CAL_MONTHS[parseInt(m)-1];
+  const sc=$('cal-slots');sc.innerHTML='';
+  SLOTS.forEach(slot=>{
+    const b=document.createElement('button');b.className='cal-slot'+(taken.includes(slot)?' taken':'');
+    b.textContent=slot;
+    if(!taken.includes(slot)){
+      b.onclick=()=>{
+        calSelectedSlot=slot;
+        document.querySelectorAll('.cal-slot').forEach(s=>s.classList.remove('sel-slot'));
+        b.classList.add('sel-slot');
+        updateCalChosen();
+      };
+    }
+    sc.appendChild(b);
+  });
+  sr.style.display='block';
+}
+function updateCalChosen(){
+  const el=$('cal-chosen');const txt=$('cal-chosen-txt');
+  if(!el||!txt)return;
+  if(calSelectedDate&&calSelectedSlot){
+    const [y,m,d]=calSelectedDate.split('-');
+    const dayName=CAL_DAYS[new Date(calSelectedDate+'T12:00:00').getDay()];
+    txt.textContent='📅 '+dayName+' '+parseInt(d)+' '+CAL_MONTHS[parseInt(m)-1]+' · ⏰ '+calSelectedSlot;
+    el.style.display='flex';
+  }else{el.style.display='none'}
+}
+function clearCalSel(){calSelectedDate=null;calSelectedSlot=null;updateCalChosen();renderCal()}
+
+// ═══════════════════════════════════════
+// ARCANOS MAYORES — DATA + RENDER
+// ═══════════════════════════════════════
+const ARCANOS_DATA=[
+  {num:'O',n:'El Loco',k:'Libertad sin límites',g:'🃏',el:'espiritu',eb:'✨ Espíritu',pb:'♅ Urano',sig:'Acuario',marseille:'En el Tarot de Marsella, El Loco aparece como un caminante que avanza hacia el abismo con total despreocupación, acompañado por un perro. No lleva número, existe fuera de la secuencia ordinaria. Es el alma en estado puro.',chamanico:'El Chamán del Umbral. Esta carta convoca la energía del iniciado que abandona todo lo conocido para adentrarse en la Gran Aventura del Espíritu. Su medicina es la desaprehensión y la confianza absoluta en el flujo del universo.',tirada:'Estás siendo llamado a soltar el control y dar el salto hacia algo nuevo con el corazón abierto. Es un mensaje de renovación radical y comienzos llenos de potencial sin explorar.'},
+  {num:'I',n:'El Mago',k:'Voluntad creadora',g:'🎩',el:'aire',eb:'🌬️ Aire',pb:'☿ Mercurio',sig:'Géminis',marseille:'El Bateleur marsellés está frente a una mesa con sus herramientas: la copa, la espada, el bastón y el pentáculo. Es el maestro de los cuatro elementos. Todo lo que necesita ya lo tiene frente a sí.',chamanico:'El Mago chamánico es el que domina el lenguaje de los cuatro mundos. Su magia no es ilusión sino la capacidad de manifestar realidad a través de la intención focalizada.',tirada:'Tienes todo lo que necesitas para comenzar ahora mismo. Tu voluntad es la varita mágica. Úsala con claridad de propósito.'},
+  {num:'II',n:'La Papisa',k:'Sabiduría velada',g:'📖',el:'agua',eb:'🌊 Agua',pb:'☽ Luna',sig:'Cáncer',marseille:'Sedente entre dos columnas, con un libro sagrado en sus manos y una tiara papal, La Papisa guarda los misterios con serena autoridad. Su mirada es intemporal.',chamanico:'La Gran Sacerdotisa chamánica es la guardiana del Akasha. Su medicina es el silencio, la gestación en oscuridad sagrada y la sabiduría que solo emerge cuando aprendemos a escuchar.',tirada:'Es tiempo de volverse hacia adentro. La respuesta que buscas no llegará del exterior. Confía en tu intuición profunda.'},
+  {num:'III',n:'La Emperatriz',k:'Abundancia encarnada',g:'👑',el:'tierra',eb:'🌿 Tierra',pb:'♀ Venus',sig:'Tauro',marseille:'La Emperatriz marsellesa sostiene un escudo con el águila imperial. Es fecunda, majestuosa y completamente en su autoridad. Representa la naturaleza en su máxima expresión productiva.',chamanico:'Pachamama en forma humana. Su medicina es la sensualidad sagrada, el cuidado del cuerpo como templo y la abundancia que fluye cuando nos permitimos recibir.',tirada:'Es un momento de fertilidad en todos los planos: creatividad desbordante y florecimiento emocional. Date permiso de recibir lo bueno.'},
+  {num:'IV',n:'El Emperador',k:'Poder y estructura',g:'⚔️',el:'fuego',eb:'🔥 Fuego',pb:'♂ Marte',sig:'Aries',marseille:'El Emperador está sentado en un trono con su cetro y orbe imperial. Su postura habla de estructura, de límites claros y de una autoridad ganada a través de la disciplina.',chamanico:'El Rey de los cuatro puntos cardinales. Su medicina es la estructura como acto de amor, los límites como actos de poder y la responsabilidad como camino espiritual.',tirada:'Necesitas ejercer liderazgo y hacerte responsable de tu realidad. Organiza, planifica y actúa con la autoridad que ya tienes dentro de ti.'},
+  {num:'V',n:'El Papa',k:'Tradición y guía',g:'✝️',el:'tierra',eb:'🌿 Tierra',pb:'♃ Júpiter',sig:'Tauro',marseille:'El Hierofante bendice a dos figuras arrodilladas ante él. Con su tiara triple es el puente entre lo humano y lo divino, custodio de la tradición sagrada.',chamanico:'El Abuelo del Linaje. Esta carta evoca el consejo de los ancestros, la sabiduría transmitida por los mayores. Su medicina es el aprendizaje respetuoso y la iniciación genuina.',tirada:'Un maestro o guía espiritual está por aparecer. Es tiempo de honrar lo que has aprendido y tomar compromisos espirituales serios.'},
+  {num:'VI',n:'El Enamorado',k:'Elección del corazón',g:'💘',el:'aire',eb:'🌬️ Aire',pb:'☿ Mercurio',sig:'Géminis',marseille:'Una figura masculina está entre dos mujeres mientras Cupido le apunta. Esta carta habla de la disyuntiva fundamental: la elección entre el camino del alma y el camino del ego.',chamanico:'La Bifurcación Sagrada. Esta carta chamánica habla de la integración de las polaridades internas: instinto y sabiduría, placer y propósito, cuerpo y espíritu.',tirada:'Estás frente a una decisión importante que no puede ser postergada. Escucha tu corazón, no tu miedo.'},
+  {num:'VII',n:'El Carro',k:'Triunfo y dirección',g:'🏆',el:'agua',eb:'🌊 Agua',pb:'☽ Luna',sig:'Cáncer',marseille:'Un rey guerrero conduce un carro tirado por dos caballos de distinto color. El carro avanza por pura voluntad y equilibrio entre las fuerzas opuestas.',chamanico:'El Jinete del Viento. Cuando el guerrero interior aprende a sostener la tensión entre la luz y la sombra, avanza con una fuerza imparable.',tirada:'Estás en un período de avance y victoria. Las fuerzas internas que antes te paralizaban se han convertido en tu motor.'},
+  {num:'VIII',n:'La Justicia',k:'Equilibrio y verdad',g:'⚖️',el:'aire',eb:'🌬️ Aire',pb:'♀ Venus',sig:'Libra',marseille:'Una figura sostiene una espada y una balanza con serena precisión. La Justicia no es ciega. Ve con total claridad y no por eso carece de compasión.',chamanico:'La Ley del Espejo. El universo es matemáticamente justo, no como castigo sino como el espejo perfecto de nuestra conciencia. Causa y efecto son una sola danza.',tirada:'Una situación requiere que actúes con total honestidad. La verdad es tu mejor aliada ahora.'},
+  {num:'IX',n:'El Ermitaño',k:'Soledad y luz interior',g:'🏮',el:'tierra',eb:'🌿 Tierra',pb:'☿ Mercurio',sig:'Virgo',marseille:'El Ermitaño camina solo con un bastón y una lámpara encendida. Es la figura del sabio que ha abandonado el mundo exterior por amor al silencio.',chamanico:'El Chamán en Retiro de Poder. La lámpara que lleva es la del conocimiento propio. Su medicina es la búsqueda genuina de la luz interior.',tirada:'Es tiempo de retirarte y buscar tu guía interior. Un período de introspección te entregará las respuestas que buscas afuera.'},
+  {num:'X',n:'La Rueda',k:'Ciclos y destino',g:'☸️',el:'fuego',eb:'🔥 Fuego',pb:'♃ Júpiter',sig:'Sagitario',marseille:'Una rueda giratoria con figuras que ascienden, están en la cima y descienden. Representa el gran ciclo del tiempo cósmico.',chamanico:'La Rueda Medicinal del Cosmos. Esta carta nos recuerda que vivimos en ciclos sagrados. La sabiduría es saber en qué parte del ciclo estás.',tirada:'Un cambio significativo está en camino. En lugar de resistir el cambio, surfea la ola con conciencia.'},
+  {num:'XI',n:'La Fuerza',k:'Poder suave',g:'🦁',el:'fuego',eb:'🔥 Fuego',pb:'☉ Sol',sig:'Leo',marseille:'Una figura femenina abre con calma las mandíbulas de un león. No hay violencia en el gesto, solo una serena determinación.',chamanico:'La Domadora del Jaguar. La verdadera fortaleza chamánica nace de la compasión hacia las propias sombras. Domesticar los instintos no significa matarlos sino integrarlos.',tirada:'La situación que enfrentas requiere la fuerza del corazón: paciencia, compasión y la confianza de que el amor tiene más poder que el miedo.'},
+  {num:'XII',n:'El Colgado',k:'Rendición sagrada',g:'🙃',el:'agua',eb:'🌊 Agua',pb:'♆ Neptuno',sig:'Piscis',marseille:'Una figura cuelga de un pie con una expresión sorprendentemente serena. Hay una entrega deliberada. Ha elegido este punto de vista opuesto al mundo.',chamanico:'El Iniciado en el Árbol Sagrado. Esta es la carta del chamán colgado de Yggdrasil, buscando la sabiduría que solo llega desde la inversión total de perspectiva.',tirada:'Es tiempo de soltar el control y rendirte ante un proceso que está ocurriendo por encima de tu voluntad. Este no es un fracaso sino una iniciación.'},
+  {num:'XIII',n:'La Muerte',k:'Transformación radical',g:'💀',el:'agua',eb:'🌊 Agua',pb:'♇ Plutón',sig:'Escorpio',marseille:'Una figura esquelética siega con una guadaña. En el Tarot de Marsella este arcano no tiene nombre escrito. Lo que representa es inevitable: el gran cambio que no admite negociación.',chamanico:'El Gran Reciclador. La muerte no es un fin sino el momento más sagrado de la transformación. Lo que muere siempre es lo que ya no sirve al propósito evolutivo del alma.',tirada:'Algo llega a su fin definitivo, y eso es exactamente lo que necesitaba ocurrir. La tierra de tus cenizas será la más fértil.'},
+  {num:'XIV',n:'La Templanza',k:'Alquimia y mesura',g:'🏺',el:'fuego',eb:'🔥 Fuego',pb:'☉ Sol',sig:'Sagitario',marseille:'Un ángel vierte líquido de una copa a otra en un flujo continuo y perfecto. Esta carta habla de la alquimia cotidiana: el arte de combinar opuestos en justa proporción.',chamanico:'El Alquimista del Alma. El chamán-alquimista sabe cuándo se necesita fuego y cuándo agua, cuándo acción y cuándo reposo.',tirada:'Necesitas paciencia y un enfoque alquímico. Esta no es una situación que se resuelve con una acción drástica. Mezcla, prueba, ajusta.'},
+  {num:'XV',n:'El Diablo',k:'Sombra e integración',g:'😈',el:'tierra',eb:'🌿 Tierra',pb:'♄ Saturno',sig:'Capricornio',marseille:'Una figura demoníaca encadena a dos seres humanos. Las cadenas son holgadas: podrían ser quitadas. El Diablo marsellés representa la servidumbre que elegimos.',chamanico:'El Guardián de la Sombra. El Diablo chamánico nos invita a mirar sin vergüenza los deseos reprimidos y patrones autodestructivos que operan en la oscuridad.',tirada:'Estás frente a una adicción o patrón limitante. La liberación es posible pero requiere que primero veas con total honestidad. La consciencia es la llave.'},
+  {num:'XVI',n:'La Torre',k:'Revelación y derrumbe',g:'🗼',el:'fuego',eb:'🔥 Fuego',pb:'♂ Marte',sig:'Aries',marseille:'Un rayo derriba la cúspide de una torre alta y dos figuras caen al vacío. La Torre representa lo que se construye sobre bases falsas.',chamanico:'El Rayo de la Verdad. En las tradiciones chamánicas el rayo es sagrado: es la voz directa del Gran Espíritu. El derrumbe no es un castigo, es una liberación.',tirada:'Algo que creías sólido se desmorona. Lo que cae merecía caer. De estas ruinas construirás algo mucho más real y duradero.'},
+  {num:'XVII',n:'La Estrella',k:'Esperanza y guía',g:'⭐',el:'aire',eb:'🌬️ Aire',pb:'♅ Urano',sig:'Acuario',marseille:'Una figura desnuda vierte agua de dos cántaros bajo un cielo de ocho estrellas. La Estrella es la promesa que sigue al derrumbe.',chamanico:'La Chamana de los Sueños. Esta carta es la del soñador lúcido. Cuando aparece, el cosmos dice: eres guiado, no estás solo.',tirada:'Después de la oscuridad, llega la guía. Confía en los sueños y en las sincronías. Es el momento de sanar la desesperanza.'},
+  {num:'XVIII',n:'La Luna',k:'Ilusión y profundidad',g:'🌕',el:'agua',eb:'🌊 Agua',pb:'☽ Luna',sig:'Piscis',marseille:'Dos torres se erigen bajo una luna llena. Un cangrejo emerge del agua y dos perros aúllan. La Luna es el reino de los miedos irracionales y las memorias del alma.',chamanico:'La Iniciadora Nocturna. La Luna gobierna el mundo de los sueños, los ancestros y los estados alterados de consciencia.',tirada:'Las apariencias engañan. No tomes decisiones importantes solo por lo que ves en la superficie. Algo subterráneo busca emerger a la conciencia.'},
+  {num:'XIX',n:'El Sol',k:'Claridad y alegría',g:'☀️',el:'fuego',eb:'🔥 Fuego',pb:'☉ Sol',sig:'Leo',marseille:'Dos niños danzan bajo un sol radiante. El Sol es la carta de mayor plenitud y claridad: la conciencia iluminada que celebra la simplicidad pura del ser.',chamanico:'El Abuelo Sol. Esta carta chamánica es la medicina de la alegría verdadera y la confianza en que eres digno de brillar exactamente como eres.',tirada:'Es un momento de celebración y éxito genuino. Permítete brillar sin disculparte. Tu éxito no opaca a nadie; los inspira.'},
+  {num:'XX',n:'El Juicio',k:'Llamado y resurrección',g:'📯',el:'fuego',eb:'🔥 Fuego',pb:'♇ Plutón',sig:'Escorpio',marseille:'Un ángel toca la trompeta del juicio final y figuras humanas se elevan de sus tumbas. El Juicio es el despertar a una llamada que no puede ser ignorada.',chamanico:'El Gran Llamado del Espíritu. Esta es la carta del momento en que el chamán recibe la llamada irrevocable. El llamado puede llegar como crisis o revelación súbita.',tirada:'Estás siendo convocado por algo más grande que tú. Hay un llamado que llevas tiempo ignorando. Es hora de responder.'},
+  {num:'XXI',n:'El Mundo',k:'Totalidad y plenitud',g:'🌍',el:'tierra',eb:'🌿 Tierra',pb:'♄ Saturno',sig:'Capricornio',marseille:'Una figura danzante en el centro de una guirnalda de laurel, rodeada por los cuatro símbolos de los evangelistas. Es la culminación del viaje del Loco.',chamanico:'La Danza de la Totalidad. El chamán que ha viajado a todos los mundos puede danzar libre en el centro de su propia rueda medicinal.',tirada:'Llegas a la culminación de un ciclo importante. Es un momento de logro, de integración total y de merecida celebración.'}
+];
+let arcElemFilter='todos',arcShuffled=null;
+function renderArc(list,hidden){
+  const grid=$('arc-grid');grid.innerHTML='';
+  $('arc-count').textContent=list.length;
+  list.forEach((a,i)=>{
+    // Índice original en ARCANOS_DATA para imagen correcta
+    const origIdx=ARCANOS_DATA.indexOf(a);
+    const imgUrl=RWS+RWS_MAP[origIdx];
+    const card=document.createElement('div');
+    card.className='arc-card'+(hidden?' arc-card-hidden':'');
+    card.innerHTML='<div class="arc-img-wrap"><img src="'+imgUrl+'" alt="'+a.n+'" loading="lazy" onerror="this.style.display=\'none\'"><div class="arc-num">'+a.num+'</div><div class="arc-overlay"><p class="arc-kw">'+a.k+'</p><span class="arc-hint">Ver interpretación</span></div></div><div class="arc-info"><span class="arc-name">'+a.n+'</span><span class="arc-elem">'+a.eb+'</span></div>';
+    card.onclick=()=>{
+      if(card.classList.contains('arc-card-hidden')){
+        // Revelar la carta individualmente
+        card.classList.remove('arc-card-hidden');
+      }else{
+        openArcModal(a,origIdx);
+      }
+    };
+    grid.appendChild(card);
+  });
+}
+function getFilteredArc(){
+  const q=($('arc-search')||{value:''}).value.toLowerCase();
+  const src=arcShuffled||ARCANOS_DATA;
+  return src.filter(a=>(arcElemFilter==='todos'||a.el===arcElemFilter)&&(a.n.toLowerCase().includes(q)||a.k.toLowerCase().includes(q)));
+}
+function filterArc(){renderArc(getFilteredArc(),false)}
+function filterElem(el,btn){arcElemFilter=el;document.querySelectorAll('.af-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderArc(getFilteredArc(),arcShuffled!==null)}
+function shuffleArc(){
+  arcShuffled=[...ARCANOS_DATA].sort(()=>Math.random()-.5);
+  const grid=$('arc-grid');
+  grid.style.opacity='.3';grid.style.transition='opacity .25s';
+  setTimeout(()=>{renderArc(getFilteredArc(),true);grid.style.opacity='1';},260);
+}
+function resetArc(){
+  arcShuffled=null;
+  renderArc(getFilteredArc(),false);
+}
+function openArcModal(a,i){
+  $('am-art').innerHTML='<div class="am-card-img"><img src="'+RWS+RWS_MAP[i]+'" alt="'+a.n+'" onerror="this.style.display=\'none\'"></div><span class="am-num">'+a.num+' · Arcano '+a.num+'</span>';
+  $('am-title').textContent=a.n;$('am-kw').textContent=a.k;
+  $('am-badges').innerHTML='<span class="am-badge">'+a.eb+'</span><span class="am-badge">'+a.pb+'</span><span class="am-badge">'+a.sig+'</span>';
+  $('am-marseille').textContent=a.marseille;$('am-chamanico').textContent=a.chamanico;$('am-tirada').textContent=a.tirada;
+  $('am-overlay').classList.add('on');
+}
+renderArc(ARCANOS_DATA,false);
+
+// ═══════════════════════════════════════
+// SCROLL REVEAL
+// ═══════════════════════════════════════
+function setupReveal(){
+  const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on')}),{threshold:.06,rootMargin:'0px 0px -20px 0px'});
+  document.querySelectorAll('.rv').forEach(el=>{if(el.getBoundingClientRect().top<innerHeight)el.classList.add('on');else obs.observe(el)});
+}
+setupReveal();
+</script>
+</body>
+</html>
