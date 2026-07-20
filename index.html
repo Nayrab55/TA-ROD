@@ -375,6 +375,8 @@ section{position:relative;z-index:1;padding:6rem 4rem}
 .modal-form input:focus,.modal-form select:focus{border-color:var(--gold)}
 .modal-submit{padding:1rem;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid var(--gold);color:var(--gl);font-family:'Cormorant Garamond',serif;font-size:.95rem;font-style:italic;letter-spacing:.1em;cursor:pointer;transition:all .3s;margin-top:.4rem}
 .modal-submit:hover{background:rgba(201,168,76,.12)}
+  .modal-reset{padding:.7rem;background:transparent;border:1px solid var(--br);color:var(--tp);font-family:'Inter',sans-serif;font-size:.78rem;letter-spacing:.05em;cursor:pointer;transition:all .3s;margin-top:.5rem;opacity:.75}
+.modal-reset:hover{border-color:var(--gold);color:var(--gl);opacity:1}
 /* Calendario */
 .cal-wrap{border:1px solid var(--br);padding:1rem;background:rgba(201,168,76,.02)}
 .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
@@ -995,6 +997,7 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
       <div class="cal-chosen" id="cal-chosen" style="display:none">
         <span id="cal-chosen-txt"></span>
         <button class="cal-chosen-clear" onclick="clearCalSel()">✕</button>
+        <button class="modal-reset" onclick="resetBookingForm()">↺ Limpiar formulario</button>
       </div>
       <button class="modal-submit" onclick="confirmBook()">✦ Confirmar mi Reserva ✦</button>
     </div>
@@ -2106,7 +2109,19 @@ function confirmBook(){
   if(!calSelectedDate||!calSelectedSlot){alert('Por favor selecciona una fecha y hora disponible.');return}
   const msg='✦ Reserva recibida ✦\n\nNombre: '+nombre+'\nFecha: '+calSelectedDate+'\nHora: '+calSelectedSlot+'\n\nEn breve recibirás confirmación al correo y vía WhatsApp.\n\nPuedes contactarnos al 📞 8821-5669';
   closeModal();
+  resetBookingForm();
   setTimeout(()=>alert(msg),300);
+}
+function resetBookingForm(){
+  if($('m-nombre'))$('m-nombre').value='';
+  if($('m-email'))$('m-email').value='';
+  if($('m-wa'))$('m-wa').value='';
+  if($('m-svc'))$('m-svc').value='';
+  if($('m-mod'))$('m-mod').value='';
+  calSelectedDate=null;calSelectedSlot=null;
+  updateCalChosen();
+  renderCal();
+}
 }
 
 // ═══════════════════════════════════════
