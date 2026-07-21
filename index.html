@@ -1054,6 +1054,8 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
 'use strict';
 // ═══════════════════════════════════════
@@ -2171,21 +2173,41 @@ async function confirmBook(){
   const bookingData={Nombre:nombre,Correo:email,WhatsApp:wa||'No indicado','Tipo de sesión':tipoSesion||'No indicado',Modalidad:modalidad||'No indicada','Fecha y hora':fechaHora,_subject:'✦ Nueva reserva en TA-ROD — '+nombre,_template:'table',_captcha:'false'};
   const waText='✦ Nueva reserva en TA-ROD ✦\n\nNombre: '+nombre+'\nCorreo: '+email+'\nWhatsApp: '+(wa||'No indicado')+'\nTipo de sesión: '+(tipoSesion||'No indicado')+'\nModalidad: '+(modalidad||'No indicada')+'\nFecha y hora: '+fechaHora;
 
-  // Se abre de inmediato (dentro del mismo click) para que el navegador no lo bloquee como pop-up.
-  window.open('https://wa.me/'+OWNER_WHATSAPP+'?text='+encodeURIComponent(waText),'_blank');
+  // Se abre en blanco de inmediato (dentro del mismo click) para que el
+  // navegador no lo bloquee como pop-up; se navega a la URL real más abajo,
+  // solo si la reserva se pudo confirmar.
+  const waWin=window.open('','_blank');
 
   const btn=document.querySelector('.modal-submit');
-  if(btn){btn.disabled=true;btn.textContent='Enviando...'}
+  if(btn){btn.disabled=true;btn.textContent='Verificando disponibilidad...'}
+
+  const claimed=await claimSlot(calSelectedDate,calSelectedSlot,{nombre,email,wa,tipoSesion,modalidad});
+  if(!claimed){
+    if(waWin)waWin.close();
+    if(btn){btn.disabled=false;btn.textContent='✦ Confirmar mi Reserva ✦'}
+    alert('Ese horario acaba de ser reservado por alguien más. Por favor elige otra fecha u hora.');
+    calSelectedSlot=null;
+    updateCalChosen();
+    showSlots(calSelectedDate);
+    return;
+  }
+  if(waWin)waWin.location.href='https://wa.me/'+OWNER_WHATSAPP+'?text='+encodeURIComponent(waText);
+
+  if(btn)btn.textContent='Enviando...';
 
   let emailOk=true;
   try{
+    const fd=new FormData();
+    Object.keys(bookingData).forEach(k=>fd.append(k,bookingData[k]));
+    // Sin 'Content-Type' manual: el navegador arma el multipart/form-data
+    // correcto y evita el preflight CORS que bloqueaba el envío como JSON.
     const resp=await fetch('https://formsubmit.co/ajax/'+encodeURIComponent(BOOKING_NOTIFY_EMAIL),{
       method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify(bookingData)
+      headers:{'Accept':'application/json'},
+      body:fd
     });
     if(!resp.ok)emailOk=false;
-  }catch(e){emailOk=false}
+  }catch(e){emailOk=false;console.error('Error enviando la reserva por correo:',e)}
 
   if(WHATSAPP_NOTIFY_ENDPOINT){
     fetch(WHATSAPP_NOTIFY_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(bookingData)}).catch(()=>{});
@@ -2215,12 +2237,82 @@ function resetBookingForm(){
 // CALENDARIO DE RESERVAS
 // ═══════════════════════════════════════
 const SLOTS=['5:00 PM','5:30 PM','6:00 PM','6:30 PM','7:00 PM','7:30 PM','8:00 PM'];
-// Slots bloqueados — simulados (en producción vendrían de un backend)
+// Slots bloqueados manualmente (además de los que ya se reservaron) —
+// útil para vacaciones o bloqueos puntuales sin tener que cancelar nada.
 const TAKEN_SLOTS={
-  // Formato: 'YYYY-MM-DD':['8:00 AM','11:00 AM',...]
+  // Formato: 'YYYY-MM-DD':['5:00 PM','6:30 PM',...]
 };
 // Días bloqueados completos (domingos por defecto)
 const BLOCKED_DAYS=[0]; // 0=domingo
+
+// ═══════════════════════════════════════
+// BASE DE DATOS DE RESERVAS (Firebase Firestore)
+// ═══════════════════════════════════════
+// Evita que dos personas reserven la misma fecha y hora. GitHub Pages solo
+// sirve archivos estáticos, así que se necesita una base de datos externa
+// compartida entre todos los visitantes — Firestore (gratis) cumple ese rol.
+//
+// Cómo activarlo (5 minutos, sin tarjeta de crédito):
+//   1. Entra a https://console.firebase.google.com con tu cuenta de Google
+//      (puede ser tatitarodcr@gmail.com) y crea un proyecto nuevo.
+//   2. En el menú izquierdo: "Firestore Database" → "Crear base de datos" →
+//      modo "Producción" → elige una región cercana (ej. us-central).
+//   3. Pestaña "Reglas" de Firestore, reemplaza el contenido por:
+//        rules_version = '2';
+//        service cloud.firestore {
+//          match /databases/{database}/documents {
+//            match /bookings/{bookingId} {
+//              allow read: if true;
+//              allow create: if !exists(/databases/$(database)/documents/bookings/$(bookingId));
+//              allow update, delete: if false;
+//            }
+//          }
+//        }
+//      Esto hace que, aunque dos personas confirmen al mismo tiempo, Firestore
+//      solo deje pasar a la primera — la segunda recibe un error automático.
+//   4. Ícono de engranaje → "Configuración del proyecto" → baja hasta "Tus apps"
+//      → ícono web "</>" → registra la app → copia el objeto firebaseConfig.
+//   5. Pega esos valores en FIREBASE_CONFIG aquí abajo.
+// Mientras quede como está (con apiKey de ejemplo), el sitio sigue
+// funcionando igual que antes, solo sin bloqueo real de doble reserva.
+const FIREBASE_CONFIG={
+  apiKey:'TU_API_KEY',
+  authDomain:'TU_PROYECTO.firebaseapp.com',
+  projectId:'TU_PROYECTO',
+  storageBucket:'TU_PROYECTO.appspot.com',
+  messagingSenderId:'000000000000',
+  appId:'TU_APP_ID'
+};
+let bookingsDB=null;
+if(typeof firebase!=='undefined'&&FIREBASE_CONFIG.apiKey&&FIREBASE_CONFIG.apiKey!=='TU_API_KEY'){
+  try{firebase.initializeApp(FIREBASE_CONFIG);bookingsDB=firebase.firestore()}catch(e){console.error('Firebase no se pudo inicializar:',e)}
+}
+function slotDocId(dateStr,slot){return dateStr+'_'+slot}
+async function getDbTakenSlots(dateStr){
+  if(!bookingsDB)return[];
+  try{
+    const snap=await bookingsDB.collection('bookings').where('date','==',dateStr).get();
+    return snap.docs.map(d=>d.data().slot);
+  }catch(e){console.error('No se pudieron consultar las reservas existentes:',e);return[]}
+}
+// Devuelve true si la reserva se pudo "reclamar" (nadie más la tenía),
+// false si alguien más ya reservó exactamente esa fecha/hora primero.
+async function claimSlot(dateStr,slot,meta){
+  if(!bookingsDB)return true; // Firestore no configurado: no hay forma de detectar conflictos reales.
+  const ref=bookingsDB.collection('bookings').doc(slotDocId(dateStr,slot));
+  try{
+    await bookingsDB.runTransaction(async(tx)=>{
+      const doc=await tx.get(ref);
+      if(doc.exists)throw new Error('SLOT_TAKEN');
+      tx.set(ref,Object.assign({date:dateStr,slot:slot,createdAt:firebase.firestore.FieldValue.serverTimestamp()},meta));
+    });
+    return true;
+  }catch(e){
+    if(e&&e.message==='SLOT_TAKEN')return false;
+    console.error('Error reservando el horario:',e);
+    return false;
+  }
+}
 
 let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
 let calSelectedDate=null,calSelectedSlot=null;
@@ -2278,13 +2370,17 @@ function selectDate(dateStr,day){
   });
   showSlots(dateStr);
 }
-function showSlots(dateStr){
+async function showSlots(dateStr){
   const sr=$('cal-sel-row');if(!sr)return;
-  const taken=TAKEN_SLOTS[dateStr]||[];
   const dayName=CAL_DAYS[new Date(dateStr+'T12:00:00').getDay()];
   const [y,m,d]=dateStr.split('-');
   $('cal-sel-lbl').textContent='Horarios disponibles — '+dayName+' '+parseInt(d)+' de '+CAL_MONTHS[parseInt(m)-1];
-  const sc=$('cal-slots');sc.innerHTML='';
+  const sc=$('cal-slots');sc.innerHTML='<p style="font-size:.7rem;opacity:.6;text-align:center;width:100%">Cargando horarios...</p>';
+  sr.style.display='block';
+  const dbTaken=await getDbTakenSlots(dateStr);
+  if(calSelectedDate!==dateStr)return; // el usuario ya cambió de día mientras cargaba
+  const taken=(TAKEN_SLOTS[dateStr]||[]).concat(dbTaken);
+  sc.innerHTML='';
   SLOTS.forEach(slot=>{
     const b=document.createElement('button');b.className='cal-slot'+(taken.includes(slot)?' taken':'');
     b.textContent=slot;
@@ -2298,7 +2394,6 @@ function showSlots(dateStr){
     }
     sc.appendChild(b);
   });
-  sr.style.display='block';
 }
 function updateCalChosen(){
   const el=$('cal-chosen');const txt=$('cal-chosen-txt');
