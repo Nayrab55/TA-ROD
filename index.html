@@ -1054,6 +1054,7 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 'use strict';
 // ═══════════════════════════════════════
@@ -2130,6 +2131,25 @@ function burnIt(){const txt=$('altar-txt').value.trim();if(!txt)return;fOn=true;
 // ═══════════════════════════════════════
 // MODAL AGENDAR
 // ═══════════════════════════════════════
+// --- Notificaciones de reserva ---
+// 1) Email vía EmailJS (https://www.emailjs.com — plan gratuito, sin backend).
+//    Crea una cuenta, un "Email Service" y un "Email Template", y reemplaza
+//    los 3 valores de abajo con los tuyos. El template debe usar estas
+//    variables: {{from_name}}, {{from_email}}, {{whatsapp}}, {{tipo_sesion}},
+//    {{modalidad}}, {{fecha_hora}}, {{to_email}}. Configura el campo "To Email"
+//    del template como {{to_email}} (o directamente tatitarodcr@gmail.com).
+const EMAILJS_PUBLIC_KEY='TU_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID='TU_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID='TU_TEMPLATE_ID';
+const BOOKING_NOTIFY_EMAIL='tatitarodcr@gmail.com';
+// 2) WhatsApp: requiere un backend propio (no se puede llamar a Twilio/Meta
+//    directamente desde el navegador sin exponer credenciales). Deja vacío
+//    ('') para desactivar, o pon aquí la URL de la función serverless de
+//    /api/notify-whatsapp.js una vez la despliegues (ver README de esa carpeta).
+const WHATSAPP_NOTIFY_ENDPOINT='';
+if(typeof emailjs!=='undefined'&&EMAILJS_PUBLIC_KEY&&EMAILJS_PUBLIC_KEY!=='TU_PUBLIC_KEY'){
+  emailjs.init({publicKey:EMAILJS_PUBLIC_KEY});
+}
 function openModal(svc){
   const labels={carta:['Carta Natal + Tarot','Lectura profunda de tu mapa estelar y los arquetipos'],pend:['Alineación con Péndulo','Diagnóstico y reequilibrio de tu campo energético'],limpieza:['Limpieza Chamánica','Ritual sagrado de transmutación y apertura de caminos']};
   const l=labels[svc]||['Agendar Sesión','Completa tus datos para reservar tu espacio sagrado'];
@@ -2140,15 +2160,43 @@ function openModal(svc){
   initCal();
 }
 function closeModal(){$('modal-ov').classList.remove('on');document.body.style.overflow=''}
-function confirmBook(){
+async function confirmBook(){
   const nombre=($('m-nombre')||{}).value||'';
   const email=($('m-email')||{}).value||'';
+  const wa=($('m-wa')||{}).value||'';
+  const svcSel=$('m-svc');
+  const tipoSesion=svcSel&&svcSel.selectedIndex>0?svcSel.options[svcSel.selectedIndex].text:'';
+  const modalidad=($('m-mod')||{}).value||'';
   if(!nombre||!email){alert('Por favor completa al menos tu nombre y correo.');return}
   if(!calSelectedDate||!calSelectedSlot){alert('Por favor selecciona una fecha y hora disponible.');return}
-  const msg='✦ Reserva recibida ✦\n\nNombre: '+nombre+'\nFecha: '+calSelectedDate+'\nHora: '+calSelectedSlot+'\n\nEn breve recibirás confirmación al correo y vía WhatsApp.\n\nPuedes contactarnos al 📞 8821-5669';
-  closeModal();
-  resetBookingForm();
-  setTimeout(()=>alert(msg),300);
+  const [y,m,d]=calSelectedDate.split('-');
+  const dayName=CAL_DAYS[new Date(calSelectedDate+'T12:00:00').getDay()];
+  const fechaHora=dayName+' '+parseInt(d)+' de '+CAL_MONTHS[parseInt(m)-1]+' '+y+' · '+calSelectedSlot;
+  const bookingData={from_name:nombre,from_email:email,whatsapp:wa,tipo_sesion:tipoSesion,modalidad:modalidad,fecha_hora:fechaHora,to_email:BOOKING_NOTIFY_EMAIL};
+
+  const btn=document.querySelector('.modal-submit');
+  if(btn){btn.disabled=true;btn.textContent='Enviando...'}
+
+  let emailOk=true;
+  if(typeof emailjs!=='undefined'&&EMAILJS_PUBLIC_KEY&&EMAILJS_PUBLIC_KEY!=='TU_PUBLIC_KEY'){
+    try{
+      await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,bookingData);
+    }catch(e){emailOk=false}
+  }
+  if(WHATSAPP_NOTIFY_ENDPOINT){
+    fetch(WHATSAPP_NOTIFY_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(bookingData)}).catch(()=>{});
+  }
+
+  if(btn){btn.disabled=false;btn.textContent='✦ Confirmar mi Reserva ✦'}
+
+  if(emailOk){
+    const msg='✦ Reserva recibida ✦\n\nNombre: '+nombre+'\nFecha: '+fechaHora+'\n\nEn breve recibirás confirmación.\n\nPuedes contactarnos al 📞 8821-5669';
+    closeModal();
+    resetBookingForm();
+    setTimeout(()=>alert(msg),300);
+  }else{
+    alert('No pudimos enviar tu reserva automáticamente. Por favor contáctanos directamente al 📞 8821-5669 o vuelve a intentarlo.');
+  }
 }
 function resetBookingForm(){
   if($('m-nombre'))$('m-nombre').value='';
@@ -2164,7 +2212,7 @@ function resetBookingForm(){
 // ═══════════════════════════════════════
 // CALENDARIO DE RESERVAS
 // ═══════════════════════════════════════
-const SLOTS=['8:00 AM','9:30 AM','11:00 AM','1:00 PM','2:30 PM','4:00 PM','5:30 PM'];
+const SLOTS=['5:00 PM','5:30 PM','6:00 PM','6:30 PM','7:00 PM','7:30 PM','8:00 PM'];
 // Slots bloqueados — simulados (en producción vendrían de un backend)
 const TAKEN_SLOTS={
   // Formato: 'YYYY-MM-DD':['8:00 AM','11:00 AM',...]
