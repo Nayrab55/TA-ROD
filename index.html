@@ -966,6 +966,9 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
   <p class="f-copy">© 2026 TA-ROD · Con amor cósmico</p>
 </footer>
 
+<!-- iframe oculto: recibe el envío del formulario de reserva a FormSubmit sin salir de la página -->
+<iframe name="mailer-frame" id="mailer-frame" style="display:none" title="mailer"></iframe>
+
 <!-- MODAL AGENDAR -->
 <div class="modal-ov" id="modal-ov" onclick="if(event.target===this)closeModal()">
   <div class="modal" style="max-width:560px;overflow-y:auto;max-height:92vh">
@@ -2158,6 +2161,27 @@ function openModal(svc){
   initCal();
 }
 function closeModal(){$('modal-ov').classList.remove('on');document.body.style.overflow=''}
+// Envía el formulario a FormSubmit como un <form> real (apuntando a un
+// iframe oculto) en vez de fetch/AJAX. El endpoint /ajax/ de FormSubmit no
+// confirma de forma confiable direcciones nuevas vía CORS; un POST de
+// formulario normal es el método que FormSubmit documenta como el más
+// confiable, tanto para el correo de activación inicial como para el envío
+// normal, y no depende de que el navegador pueda leer la respuesta.
+function sendBookingEmail(email,data){
+  const form=document.createElement('form');
+  form.action='https://formsubmit.co/'+encodeURIComponent(email);
+  form.method='POST';
+  form.target='mailer-frame';
+  form.style.display='none';
+  Object.keys(data).forEach(k=>{
+    const input=document.createElement('input');
+    input.type='hidden';input.name=k;input.value=data[k];
+    form.appendChild(input);
+  });
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(()=>form.remove(),1000);
+}
 async function confirmBook(){
   const nombre=($('m-nombre')||{}).value||'';
   const email=($('m-email')||{}).value||'';
@@ -2195,19 +2219,9 @@ async function confirmBook(){
 
   if(btn)btn.textContent='Enviando...';
 
-  let emailOk=true;
   try{
-    const fd=new FormData();
-    Object.keys(bookingData).forEach(k=>fd.append(k,bookingData[k]));
-    // Sin 'Content-Type' manual: el navegador arma el multipart/form-data
-    // correcto y evita el preflight CORS que bloqueaba el envío como JSON.
-    const resp=await fetch('https://formsubmit.co/ajax/'+encodeURIComponent(BOOKING_NOTIFY_EMAIL),{
-      method:'POST',
-      headers:{'Accept':'application/json'},
-      body:fd
-    });
-    if(!resp.ok)emailOk=false;
-  }catch(e){emailOk=false;console.error('Error enviando la reserva por correo:',e)}
+    sendBookingEmail(BOOKING_NOTIFY_EMAIL,bookingData);
+  }catch(e){console.error('Error enviando la reserva por correo:',e)}
 
   if(WHATSAPP_NOTIFY_ENDPOINT){
     fetch(WHATSAPP_NOTIFY_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(bookingData)}).catch(()=>{});
@@ -2215,9 +2229,7 @@ async function confirmBook(){
 
   if(btn){btn.disabled=false;btn.textContent='✦ Confirmar mi Reserva ✦'}
 
-  const msg=emailOk
-    ?'✦ Reserva recibida ✦\n\nNombre: '+nombre+'\nFecha: '+fechaHora+'\n\nEn breve recibirás confirmación.\n\nSi no se abrió WhatsApp automáticamente, puedes contactarnos al 📞 8821-5669'
-    :'✦ Reserva recibida ✦\n\nNombre: '+nombre+'\nFecha: '+fechaHora+'\n\nTe abrimos un chat de WhatsApp para confirmar tu reserva ahí mismo. Por favor dale "Enviar" al mensaje que te dejamos escrito.';
+  const msg='✦ Reserva recibida ✦\n\nNombre: '+nombre+'\nFecha: '+fechaHora+'\n\nEn breve recibirás confirmación.\n\nSi no se abrió WhatsApp automáticamente, puedes contactarnos al 📞 8821-5669';
   closeModal();
   resetBookingForm();
   setTimeout(()=>alert(msg),300);
