@@ -42,6 +42,7 @@ nav.sc{border-bottom-color:var(--br);background:rgba(7,7,26,.97)}
 .nav-cta:hover{background:rgba(201,168,76,.1)}
 .nav-tel{font-size:.6rem;letter-spacing:.15em;color:var(--gold);text-decoration:none;border:1px solid var(--br);padding:.42rem .9rem;transition:all .3s;white-space:nowrap}
 .nav-tel:hover{border-color:var(--bb);color:var(--gl)}
+.nav-ig{display:inline-flex;align-items:center;gap:.4rem}
 
 /* HERO */
 #hero{position:relative;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;z-index:1}
@@ -450,6 +451,8 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
 @media(max-width:600px){
   .elem-grid{grid-template-columns:1fr}
   .arc-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr))}
+  nav{flex-wrap:wrap;row-gap:.6rem;padding:1rem 1.2rem}
+  .nav-tel{font-size:.55rem;padding:.38rem .7rem}
 }
 </style>
 
@@ -501,6 +504,7 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
   </ul>
   <button class="nav-cta" onclick="openModal()">Agendar Sesión</button>
   <a href="https://wa.me/50688215669" class="nav-tel" target="_blank">📞 +(506) 8821-5669</a>
+  <a href="https://www.instagram.com/tatitarotcr/" class="nav-tel nav-ig" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><circle cx="12" cy="12" r="4.4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg> Instagram</a>
 </nav>
 
 <!-- HERO -->
