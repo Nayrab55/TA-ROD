@@ -601,7 +601,7 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
       <div class="fg"><label>Ciudad de Nacimiento</label><input type="text" id="b-city" placeholder="Ej: San José, Costa Rica"></div>
     </div>
     <div class="carta-btns-row rv">
-      <a href="https://es.astro-seek.com/carta-natal-calcular-online-gratis" target="_blank" rel="noopener" class="carta-btn-clear" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">🔗 Calcular en Astro-Seek (opcional)</a>
+      <button class="carta-btn" onclick="calcCarta()">✦ Calcular mi Carta Natal ✦</button>
       <button class="carta-btn-clear" onclick="clearCarta()">✕ Limpiar</button>
       <button class="carta-btn-reset" onclick="resetCarta()">↺ Nueva Consulta</button>
     </div>
@@ -1056,6 +1056,8 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="lib/astronomy-engine.min.js"></script>
+<script src="lib/tz-lookup.js"></script>
 <script>
 'use strict';
 // ═══════════════════════════════════════
@@ -1319,51 +1321,118 @@ function calcAspects(positions){
 
 function norm360(x){return((x%360)+360)%360}
 function degToSignPos(totalDeg){const d=norm360(totalDeg),signIdx=Math.floor(d/30),deg=d-signIdx*30,degInt=Math.floor(deg),min=Math.round((deg-degInt)*60);return{signIdx,deg:degInt,min,total:d}}
-function dateToJD(year,month,day,hour,minute,tzOffsetHours){const UT=hour+minute/60-tzOffsetHours;let y=year,m=month;const d=day+UT/24;if(m<=2){y-=1;m+=12}const A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5}
-function getLonOffset(lonDeg){return lonDeg/15}
+function jdFromUTCDate(date){return date.getTime()/86400000+2440587.5}
 
-function calcPlanetPositions(jd){
-  const T=(jd-2451545.0)/36525.0;
-  function norm(x){return((x%360)+360)%360}
+// ── Zona horaria real del lugar de nacimiento (no solo longitud geográfica) ──
+// tzlookup(lat,lon) -> nombre IANA (ej. 'America/Costa_Rica'); luego se usa el
+// motor de zonas horarias del propio navegador (Intl, con datos históricos
+// completos de DST) para hallar el instante UTC exacto de esa hora local.
+function tzOffsetMinutesAt(ianaZone,utcDate){
+  const dtf=new Intl.DateTimeFormat('en-US',{timeZone:ianaZone,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const parts=dtf.formatToParts(utcDate).reduce((acc,p)=>{acc[p.type]=p.value;return acc},{});
+  const asUTC=Date.UTC(+parts.year,+parts.month-1,+parts.day,+parts.hour,+parts.minute,+parts.second);
+  return(asUTC-utcDate.getTime())/60000;
+}
+function localWallClockToUTC(ianaZone,y,m,d,hh,mm){
+  const guess=new Date(Date.UTC(y,m-1,d,hh,mm,0));
+  const off1=tzOffsetMinutesAt(ianaZone,guess);
+  const utc1=new Date(guess.getTime()-off1*60000);
+  const off2=tzOffsetMinutesAt(ianaZone,utc1);
+  return new Date(guess.getTime()-off2*60000);
+}
+
+// ── Posiciones planetarias vía Astronomy Engine (precisión VSOP87/ELP2000,
+// equivalente en la práctica a la que usan efemérides profesionales) ──
+function calcPlanetPositions(utcDate){
+  const positions={
+    sun:norm360(Astronomy.SunPosition(utcDate).elon),
+    moon:norm360(Astronomy.EclipticGeoMoon(utcDate).lon)
+  };
+  const bodies={mercury:'Mercury',venus:'Venus',mars:'Mars',jupiter:'Jupiter',saturn:'Saturn',uranus:'Uranus',neptune:'Neptune',pluto:'Pluto'};
+  for(const key in bodies){
+    const vec=Astronomy.GeoVector(Astronomy.Body[bodies[key]],utcDate,true);
+    positions[key]=norm360(Astronomy.Ecliptic(vec).elon);
+  }
+  // Nodo Norte medio, Quirón y Lilith media: sin teoría orbital dedicada en
+  // Astronomy Engine, se mantienen fórmulas de aproximación (impacto menor
+  // en la carta frente al Sol/Luna/planetas y los ángulos ASC/MC/casas).
+  const T=(jdFromUTCDate(utcDate)-2451545.0)/36525.0;
   function rad(d){return d*Math.PI/180}
-  const L0=norm(280.46646+36000.76983*T),M=norm(357.52911+35999.05029*T),Mr=rad(M);
-  const C=(1.914602-0.004817*T)*Math.sin(Mr)+(0.019993-0.000101*T)*Math.sin(2*Mr)+0.000289*Math.sin(3*Mr);
-  const sunLon=norm(L0+C);
-  const Lp=norm(218.3165+481267.8813*T),D=norm(297.8502+445267.1115*T),Mm=norm(134.9634+477198.8676*T),F=norm(93.2721+483202.0175*T);
-  const moonLon=norm(Lp+6.2888*Math.sin(rad(Mm))+1.2740*Math.sin(rad(2*D-Mm))+0.6583*Math.sin(rad(2*D))+0.2136*Math.sin(rad(2*Mm))-0.1851*Math.sin(rad(M))-0.1143*Math.sin(rad(2*F))+0.0588*Math.sin(rad(2*D-2*Mm))+0.0572*Math.sin(rad(2*D-M-Mm))+0.0533*Math.sin(rad(2*D+Mm)));
-  const mercuryLon=norm(252.251+149474.072*T+23.440*Math.sin(rad(norm(174.795+149474.070*T)))+2.9791*Math.sin(2*rad(norm(174.795+149474.070*T))));
-  const venusLon=norm(181.979+58519.213*T+0.7758*Math.sin(rad(norm(212.060+58517.804*T))));
-  const marsLon=norm(355.433+19141.696*T+10.691*Math.sin(rad(norm(19.373+19140.030*T)))+0.6230*Math.sin(2*rad(norm(19.373+19140.030*T))));
-  const jupM=norm(20.020+3034.906*T),jupiterLon=norm(34.351+3034.906*T+5.5549*Math.sin(rad(jupM))+0.1683*Math.sin(2*rad(jupM)));
-  const satM=norm(317.020+1222.114*T),saturnLon=norm(50.077+1222.114*T+6.3585*Math.sin(rad(satM))+0.2204*Math.sin(2*rad(satM)));
-  const uranusLon=norm(314.055+428.296*T+0.7741*Math.sin(rad(norm(141.896+428.296*T))));
-  const neptuneLon=norm(304.349+218.457*T+1.0170*Math.sin(rad(norm(256.225+218.457*T))));
-  const pluM=norm(14.882+145.181*T),plutoLon=norm(238.929+145.181*T+28.3150*Math.sin(rad(pluM))+4.3408*Math.sin(2*rad(pluM)));
-  const northNode=norm(125.0445-1934.1363*T+0.002073*T*T);
-  const chironLon=norm(163.35+50.083*T+6.88*Math.sin(rad(norm(209.68+50.083*T))));
-  const lilithLon=norm(83.354+40.6903*T);
-  return{sun:sunLon,moon:moonLon,mercury:mercuryLon,venus:venusLon,mars:marsLon,jupiter:jupiterLon,saturn:saturnLon,uranus:uranusLon,neptune:neptuneLon,pluto:plutoLon,north_node:northNode,chiron:chironLon,lilith:lilithLon};
+  positions.north_node=norm360(125.0445-1934.1363*T+0.002073*T*T);
+  positions.chiron=norm360(163.35+50.083*T+6.88*Math.sin(rad(norm360(209.68+50.083*T))));
+  positions.lilith=norm360(83.354+40.6903*T);
+  return positions;
 }
 
-function calcASCMC(jd,latDeg,lonDeg){
-  const T=(jd-2451545.0)/36525.0;
-  const GMST=norm360(280.46061837+360.98564736629*(jd-2451545)+0.000387933*T*T);
-  const LST=norm360(GMST+lonDeg);
-  const obliq=23.4393-0.01300*T;
-  let MC=Math.atan2(Math.tan(LST*Math.PI/180),Math.cos(obliq*Math.PI/180))*180/Math.PI;
-  if(MC<0)MC+=360;
-  if(LST>90&&LST<=270)MC=(MC+180)%360;
-  const latR=latDeg*Math.PI/180,LSTR=LST*Math.PI/180,oblR=obliq*Math.PI/180;
-  let asc=Math.atan(-Math.cos(LSTR)/(Math.sin(LSTR)*Math.cos(oblR)+Math.tan(latR)*Math.sin(oblR)))*180/Math.PI;
-  if(Math.cos(LSTR)<0)asc+=180;
-  asc=norm360(asc);
-  return{asc,mc:MC};
+// ── Ascendente / Medio Cielo, usando hora sidérea y oblicuidad de alta
+// precisión (con nutación) de Astronomy Engine ──
+function calcASCMC(utcDate,latDeg,lonDeg){
+  const atime=Astronomy.MakeTime(utcDate);
+  const ramc=norm360(Astronomy.SiderealTime(atime)*15+lonDeg);
+  const obliq=Astronomy.e_tilt(atime).tobl;
+  const ramcR=ramc*Math.PI/180,oblR=obliq*Math.PI/180,latR=latDeg*Math.PI/180;
+  let MC=norm360(Math.atan2(Math.sin(ramcR),Math.cos(ramcR)*Math.cos(oblR))*180/Math.PI);
+  let asc=norm360(Math.atan2(Math.cos(ramcR),-(Math.sin(ramcR)*Math.cos(oblR)+Math.tan(latR)*Math.sin(oblR)))*180/Math.PI);
+  return{asc,mc:MC,ramc,obliq};
 }
 
-function calcHousesPlacidus(jd,lat,lon,asc,mc){
-  function placidusInterp(h1,h2,frac){let d=h2-h1;if(d<0)d+=360;return norm360(h1+d*frac)}
-  const ic=norm360(mc+180),dsc=norm360(asc+180);
-  return{1:asc,2:placidusInterp(asc,ic,1/3),3:placidusInterp(asc,ic,2/3),4:ic,5:placidusInterp(ic,dsc,1/3),6:placidusInterp(ic,dsc,2/3),7:dsc,8:placidusInterp(dsc,mc,1/3),9:placidusInterp(dsc,mc,2/3),10:mc,11:placidusInterp(mc,asc,1/3),12:placidusInterp(mc,asc,2/3)};
+// ── Casas Placidus reales (trisección del arco diurno/nocturno de cada punto
+// eclíptico, resuelta numéricamente) — no una interpolación angular simple ──
+function raDecOfEcl(lambdaDeg,oblDeg){
+  const l=lambdaDeg*Math.PI/180,e=oblDeg*Math.PI/180;
+  const ra=norm360(Math.atan2(Math.cos(e)*Math.sin(l),Math.cos(l))*180/Math.PI);
+  const dec=Math.asin(Math.sin(e)*Math.sin(l))*180/Math.PI;
+  return{ra,dec};
+}
+function ascDiffDeg(decDeg,latDeg){
+  const t=Math.tan(latDeg*Math.PI/180)*Math.tan(decDeg*Math.PI/180);
+  if(t>1||t<-1)return null; // circumpolar: sin cruce de horizonte en esa latitud
+  return Math.asin(t)*180/Math.PI;
+}
+function placidusResidual(lambdaDeg,oblDeg,latDeg,ramc,F,side){
+  const{ra,dec}=raDecOfEcl(lambdaDeg,oblDeg);
+  const ad=ascDiffDeg(dec,latDeg);
+  if(ad===null)return null;
+  const target=side==='day'?norm360(ramc+F*(90+ad)):norm360(norm360(ramc+180)-(1-F)*(90-ad));
+  let diff=norm360(ra-target);
+  if(diff>180)diff-=360;
+  return diff;
+}
+function solveCuspFull(oblDeg,latDeg,ramc,F,side){
+  const N=1440;
+  let prevL=0,prevR=placidusResidual(0,oblDeg,latDeg,ramc,F,side);
+  const roots=[];
+  for(let i=1;i<=N;i++){
+    const l=(i*360)/N;
+    const r=placidusResidual(l,oblDeg,latDeg,ramc,F,side);
+    if(prevR!==null&&r!==null&&((prevR<=0&&r>=0)||(prevR>=0&&r<=0))){
+      let lo=prevL,hi=l;
+      for(let it=0;it<40;it++){
+        const mid=(lo+hi)/2;
+        const rlo=placidusResidual(lo,oblDeg,latDeg,ramc,F,side);
+        const rm=placidusResidual(mid,oblDeg,latDeg,ramc,F,side);
+        if((rlo<=0&&rm>=0)||(rlo>=0&&rm<=0))hi=mid;else lo=mid;
+      }
+      roots.push(norm360(lo));
+    }
+    prevL=l;prevR=r;
+  }
+  return roots;
+}
+function pickInArc(cands,a,b){
+  const span=norm360(b-a);
+  for(const c of cands){const rel=norm360(c-a);if(rel>.001&&rel<span-.001)return c}
+  return null;
+}
+function calcHousesPlacidus(obliq,lat,ramc,asc,mc){
+  const h={10:mc,1:asc,4:norm360(mc+180),7:norm360(asc+180)};
+  const fallback=(a,b,frac)=>{const d=norm360(b-a);return norm360(a+d*frac)};
+  h[11]=pickInArc(solveCuspFull(obliq,lat,ramc,1/3,'day'),h[10],h[1])??fallback(h[10],h[1],1/3);
+  h[12]=pickInArc(solveCuspFull(obliq,lat,ramc,2/3,'day'),h[10],h[1])??fallback(h[10],h[1],2/3);
+  h[2]=pickInArc(solveCuspFull(obliq,lat,ramc,1/3,'night'),h[1],h[4])??fallback(h[1],h[4],1/3);
+  h[3]=pickInArc(solveCuspFull(obliq,lat,ramc,2/3,'night'),h[1],h[4])??fallback(h[1],h[4],2/3);
+  h[5]=norm360(h[11]+180);h[6]=norm360(h[12]+180);h[8]=norm360(h[2]+180);h[9]=norm360(h[3]+180);
+  return h;
 }
 
 function inHouseArc(deg,h1,h2){if(h2>h1)return deg>=h1&&deg<h2;return deg>=h1||deg<h2}
@@ -1381,12 +1450,12 @@ async function calcCarta(){
     if(!geo){showCartaError('No se encontró la ciudad "'+cityVal+'". Intenta con formato: Ciudad, País');return}
     const [year,month,day]=dateVal.split('-').map(Number);
     const [hour,minute]=(timeVal||'12:00').split(':').map(Number);
-    const tzOffset=getLonOffset(geo.lon);
-    const jd=dateToJD(year,month,day,hour,minute,tzOffset);
-    const positions=calcPlanetPositions(jd);
-    const {asc,mc}=calcASCMC(jd,geo.lat,geo.lon);
+    const ianaZone=tzlookup(geo.lat,geo.lon);
+    const utcDate=localWallClockToUTC(ianaZone,year,month,day,hour,minute);
+    const positions=calcPlanetPositions(utcDate);
+    const {asc,mc,ramc,obliq}=calcASCMC(utcDate,geo.lat,geo.lon);
     positions.asc=asc;positions.mc=mc;
-    const houses=calcHousesPlacidus(jd,geo.lat,geo.lon,asc,mc);
+    const houses=calcHousesPlacidus(obliq,geo.lat,ramc,asc,mc);
     for(const pKey of Object.keys(positions)){
       if(pKey.includes('_'))continue;
       let h=1;const pDeg=norm360(positions[pKey]);
