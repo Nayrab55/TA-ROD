@@ -373,6 +373,21 @@ section{position:relative;z-index:1;padding:6rem 4rem}
 .modal-form{display:flex;flex-direction:column;gap:.9rem}
 .modal-form input,.modal-form select{padding:.85rem 1rem;background:rgba(201,168,76,.03);border:1px solid var(--br);color:var(--tp);font-family:'Inter',sans-serif;font-size:.82rem;outline:none;transition:border-color .3s;-webkit-appearance:none;color-scheme:dark}
 .modal-form input:focus,.modal-form select:focus{border-color:var(--gold)}
+/* Dropdown personalizado (reemplaza el <select> nativo, que el navegador
+   pinta con su propio estilo claro sin importar el tema del sitio) */
+.dd{position:relative}
+.dd-trigger{width:100%;text-align:left;background:rgba(201,168,76,.03);border:1px solid var(--br);padding:.85rem 1rem;color:var(--tp);font-family:'Inter',sans-serif;font-size:.82rem;cursor:pointer;transition:border-color .3s;display:flex;justify-content:space-between;align-items:center;gap:.6rem}
+.dd-trigger:hover{border-color:var(--gold)}
+.dd.open .dd-trigger{border-color:var(--gold)}
+.dd-trigger-text.is-placeholder{color:var(--ts)}
+.dd-arrow{color:var(--gd);font-size:.65rem;flex-shrink:0;transition:transform .3s}
+.dd.open .dd-arrow{transform:rotate(180deg)}
+.dd-panel{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--dp);border:1px solid var(--bb);max-height:240px;overflow-y:auto;z-index:40;opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .25s,transform .25s;box-shadow:0 14px 34px rgba(0,0,0,.55)}
+.dd-panel.open{opacity:1;pointer-events:all;transform:translateY(0)}
+.dd-opt{padding:.75rem 1rem;font-size:.78rem;color:var(--ts);cursor:pointer;transition:background .2s,color .2s;border-bottom:1px solid rgba(201,168,76,.08)}
+.dd-opt:last-child{border-bottom:none}
+.dd-opt:hover{background:rgba(201,168,76,.1);color:var(--gl)}
+.dd-opt.sel{color:var(--gold)}
 .modal-submit{padding:1rem;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid var(--gold);color:var(--gl);font-family:'Cormorant Garamond',serif;font-size:.95rem;font-style:italic;letter-spacing:.1em;cursor:pointer;transition:all .3s;margin-top:.4rem}
 .modal-submit:hover{background:rgba(201,168,76,.12)}
   .modal-reset{padding:.7rem;background:transparent;border:1px solid var(--br);color:var(--tp);font-family:'Inter',sans-serif;font-size:.78rem;letter-spacing:.05em;cursor:pointer;transition:all .3s;margin-top:.5rem;opacity:.75}
@@ -485,7 +500,7 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
     <li><a href="#servicios">Sesiones</a></li>
   </ul>
   <button class="nav-cta" onclick="openModal()">Agendar Sesión</button>
-  <a href="https://wa.me/50688215669" class="nav-tel" target="_blank">📞 8821-5669</a>
+  <a href="https://wa.me/50688215669" class="nav-tel" target="_blank">📞 +(506) 8821-5669</a>
 </nav>
 
 <!-- HERO -->
@@ -976,26 +991,50 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
       <input type="text" id="m-nombre" placeholder="Tu nombre completo">
       <input type="email" id="m-email" placeholder="Correo electrónico">
       <input type="tel" id="m-wa" placeholder="WhatsApp (ej: 88215669)">
-      <select id="m-svc" style="color-scheme:dark">
-        <option value="">Tipo de sesión</option>
-        <option value="carta">Carta Natal + Tarot — $90 USD</option>
-        <option value="pend">Alineación con Péndulo — $75 USD</option>
-        <option value="limpieza">Limpieza Chamánica — $110 USD</option>
-        <option value="revolucion">Revolución Solar — $65 USD</option>
-        <option value="munay">Iniciación Munay-Ki — $95 USD</option>
-        <option value="animales">Animales de Poder — $70 USD</option>
-        <option value="akashicos">Lectura de Registros Akásicos — $85 USD</option>
-        <option value="pleyadiana">Sanación Pleyadiana — $80 USD</option>
-        <option value="alma">Informe del Alma — $95 USD</option>
-        <option value="bloqueos">Limpieza de Bloqueos Energéticos — $75 USD</option>
-        <option value="psicogenealogia">Psicogenealogía — $85 USD</option>
-        <option value="kundalini">Activación Kundalini — $90 USD</option>
-      </select>
-      <select id="m-mod" style="color-scheme:dark">
-        <option value="">Modalidad</option>
-        <option>Virtual (Zoom)</option>
-        <option>Presencial</option>
-      </select>
+      <div class="dd" id="svc-dd">
+        <button type="button" class="dd-trigger" id="svc-trigger" onclick="toggleDD('svc')"><span class="dd-trigger-text">Tipo de sesión</span><span class="dd-arrow">▾</span></button>
+        <div class="dd-panel" id="svc-panel">
+          <div class="dd-opt" data-value="carta">Carta Natal + Tarot — $90 USD</div>
+          <div class="dd-opt" data-value="pend">Alineación con Péndulo — $75 USD</div>
+          <div class="dd-opt" data-value="limpieza">Limpieza Chamánica — $110 USD</div>
+          <div class="dd-opt" data-value="revolucion">Revolución Solar — $65 USD</div>
+          <div class="dd-opt" data-value="munay">Iniciación Munay-Ki — $95 USD</div>
+          <div class="dd-opt" data-value="animales">Animales de Poder — $70 USD</div>
+          <div class="dd-opt" data-value="akashicos">Lectura de Registros Akásicos — $85 USD</div>
+          <div class="dd-opt" data-value="pleyadiana">Sanación Pleyadiana — $80 USD</div>
+          <div class="dd-opt" data-value="alma">Informe del Alma — $95 USD</div>
+          <div class="dd-opt" data-value="bloqueos">Limpieza de Bloqueos Energéticos — $75 USD</div>
+          <div class="dd-opt" data-value="psicogenealogia">Psicogenealogía — $85 USD</div>
+          <div class="dd-opt" data-value="kundalini">Activación Kundalini — $90 USD</div>
+        </div>
+        <select id="m-svc" style="display:none">
+          <option value="">Tipo de sesión</option>
+          <option value="carta">Carta Natal + Tarot — $90 USD</option>
+          <option value="pend">Alineación con Péndulo — $75 USD</option>
+          <option value="limpieza">Limpieza Chamánica — $110 USD</option>
+          <option value="revolucion">Revolución Solar — $65 USD</option>
+          <option value="munay">Iniciación Munay-Ki — $95 USD</option>
+          <option value="animales">Animales de Poder — $70 USD</option>
+          <option value="akashicos">Lectura de Registros Akásicos — $85 USD</option>
+          <option value="pleyadiana">Sanación Pleyadiana — $80 USD</option>
+          <option value="alma">Informe del Alma — $95 USD</option>
+          <option value="bloqueos">Limpieza de Bloqueos Energéticos — $75 USD</option>
+          <option value="psicogenealogia">Psicogenealogía — $85 USD</option>
+          <option value="kundalini">Activación Kundalini — $90 USD</option>
+        </select>
+      </div>
+      <div class="dd" id="mod-dd">
+        <button type="button" class="dd-trigger" id="mod-trigger" onclick="toggleDD('mod')"><span class="dd-trigger-text">Modalidad</span><span class="dd-arrow">▾</span></button>
+        <div class="dd-panel" id="mod-panel">
+          <div class="dd-opt" data-value="Virtual (Zoom)">Virtual (Zoom)</div>
+          <div class="dd-opt" data-value="Presencial">Presencial</div>
+        </div>
+        <select id="m-mod" style="display:none">
+          <option value="">Modalidad</option>
+          <option>Virtual (Zoom)</option>
+          <option>Presencial</option>
+        </select>
+      </div>
       <!-- CALENDARIO -->
       <div class="cal-wrap">
         <div class="cal-header">
@@ -1710,7 +1749,7 @@ async function generateAndDownloadDocx(sectionId,data){
     content+='\nINTERPRETACIÓN CHAMÁNICA\n\n';
     d.interpretaciones.forEach(i=>content+=i.titulo+':\n'+i.texto+'\n\n');
   }else if(payload.content){content+=payload.content}
-  content+='\n━'.repeat(50)+'\n✦ TA-ROD · Tarot · Astrología · Chamanismo · 📞 8821-5669\n';
+  content+='\n━'.repeat(50)+'\n✦ TA-ROD · Tarot · Astrología · Chamanismo · 📞 +(506) 8821-5669\n';
   content+='Para descargar como .docx: ejecuta node server.js en la carpeta tarod-server\n';
 
   const blob=new Blob(['\uFEFF'+content],{type:'text/plain;charset=utf-8'});
@@ -2217,11 +2256,46 @@ const OWNER_WHATSAPP='50688215669';
 //    necesitas un backend con Twilio (ver api/README.md) y pegar aquí la URL
 //    de esa función una vez desplegada. Vacío = desactivado.
 const WHATSAPP_NOTIFY_ENDPOINT='';
+// ── Dropdown personalizado (Tipo de sesión / Modalidad) ──
+function toggleDD(id){
+  const panel=$(id+'-panel'),dd=$(id+'-dd');
+  const willOpen=!dd.classList.contains('open');
+  document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('.dd-panel.open').forEach(p=>p.classList.remove('open'));
+  if(willOpen){dd.classList.add('open');panel.classList.add('open')}
+}
+function initDD(id){
+  const sel=$('m-'+id),panel=$(id+'-panel');
+  panel.querySelectorAll('.dd-opt').forEach(opt=>{
+    opt.onclick=()=>{
+      sel.value=opt.dataset.value;
+      syncDDFromSelect(id);
+      $(id+'-dd').classList.remove('open');
+      panel.classList.remove('open');
+    };
+  });
+}
+function syncDDFromSelect(id){
+  const sel=$('m-'+id),trigger=$(id+'-trigger').querySelector('.dd-trigger-text'),panel=$(id+'-panel');
+  const placeholder=sel.options[0].text;
+  const opt=sel.value?sel.options[sel.selectedIndex]:null;
+  trigger.textContent=opt?opt.text:placeholder;
+  trigger.classList.toggle('is-placeholder',!opt);
+  panel.querySelectorAll('.dd-opt').forEach(o=>o.classList.toggle('sel',o.dataset.value===sel.value));
+}
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.dd')){
+    document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));
+    document.querySelectorAll('.dd-panel.open').forEach(p=>p.classList.remove('open'));
+  }
+});
+initDD('svc');initDD('mod');
 function openModal(svc){
   const labels={carta:['Carta Natal + Tarot','Lectura profunda de tu mapa estelar y los arquetipos'],pend:['Alineación con Péndulo','Diagnóstico y reequilibrio de tu campo energético'],limpieza:['Limpieza Chamánica','Ritual sagrado de transmutación y apertura de caminos']};
   const l=labels[svc]||['Agendar Sesión','Completa tus datos para reservar tu espacio sagrado'];
   $('m-title').textContent=l[0];$('m-sub').textContent=l[1];
   if(svc&&$('m-svc'))$('m-svc').value=svc;
+  syncDDFromSelect('svc');syncDDFromSelect('mod');
   $('modal-ov').classList.add('on');
   document.body.style.overflow='hidden';
   initCal();
@@ -2298,6 +2372,7 @@ function resetBookingForm(){
   if($('m-wa'))$('m-wa').value='';
   if($('m-svc'))$('m-svc').value='';
   if($('m-mod'))$('m-mod').value='';
+  syncDDFromSelect('svc');syncDDFromSelect('mod');
   calSelectedDate=null;calSelectedSlot=null;
   updateCalChosen();
   renderCal();
@@ -2671,7 +2746,7 @@ setupReveal();
 (function checkBookingConfirmed(){
   if(location.search.indexOf('reserva=ok')===-1)return;
   history.replaceState(null,'',location.pathname);
-  setTimeout(()=>alert('✦ Reserva recibida ✦\n\nGracias, tu solicitud se envió correctamente. En breve recibirás confirmación.\n\nSi no se abrió WhatsApp automáticamente, puedes contactarnos al 📞 8821-5669'),300);
+  setTimeout(()=>alert('✦ Reserva recibida ✦\n\nGracias, tu solicitud se envió correctamente. En breve recibirás confirmación.\n\nSi no se abrió WhatsApp automáticamente, puedes contactarnos al 📞 +(506) 8821-5669'),300);
 })();
 </script>
   <script>
