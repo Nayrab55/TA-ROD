@@ -966,9 +966,6 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
   <p class="f-copy">© 2026 TA-ROD · Con amor cósmico</p>
 </footer>
 
-<!-- iframe oculto: recibe el envío del formulario de reserva a FormSubmit sin salir de la página -->
-<iframe name="mailer-frame" id="mailer-frame" style="display:none" title="mailer"></iframe>
-
 <!-- MODAL AGENDAR -->
 <div class="modal-ov" id="modal-ov" onclick="if(event.target===this)closeModal()">
   <div class="modal" style="max-width:560px;overflow-y:auto;max-height:92vh">
@@ -2161,26 +2158,25 @@ function openModal(svc){
   initCal();
 }
 function closeModal(){$('modal-ov').classList.remove('on');document.body.style.overflow=''}
-// Envía el formulario a FormSubmit como un <form> real (apuntando a un
-// iframe oculto) en vez de fetch/AJAX. El endpoint /ajax/ de FormSubmit no
-// confirma de forma confiable direcciones nuevas vía CORS; un POST de
-// formulario normal es el método que FormSubmit documenta como el más
-// confiable, tanto para el correo de activación inicial como para el envío
-// normal, y no depende de que el navegador pueda leer la respuesta.
+// Envía el formulario a FormSubmit navegando de verdad a su endpoint (sin
+// iframe ni fetch/AJAX) — el método más simple y confiable que ellos
+// documentan, y el único que además nos deja VER en pantalla si algo falla
+// (por ejemplo, si el correo todavía no está activado, FormSubmit muestra su
+// propia página pidiendo la activación en vez de fallar en silencio).
+// _next hace que, una vez enviado, vuelva a esta misma página.
 function sendBookingEmail(email,data){
+  const nextUrl=location.origin+location.pathname+'?reserva=ok';
   const form=document.createElement('form');
   form.action='https://formsubmit.co/'+encodeURIComponent(email);
   form.method='POST';
-  form.target='mailer-frame';
-  form.style.display='none';
-  Object.keys(data).forEach(k=>{
+  const fields=Object.assign({},data,{_next:nextUrl});
+  Object.keys(fields).forEach(k=>{
     const input=document.createElement('input');
-    input.type='hidden';input.name=k;input.value=data[k];
+    input.type='hidden';input.name=k;input.value=fields[k];
     form.appendChild(input);
   });
   document.body.appendChild(form);
   form.submit();
-  setTimeout(()=>form.remove(),1000);
 }
 async function confirmBook(){
   const nombre=($('m-nombre')||{}).value||'';
@@ -2219,20 +2215,13 @@ async function confirmBook(){
 
   if(btn)btn.textContent='Enviando...';
 
-  try{
-    sendBookingEmail(BOOKING_NOTIFY_EMAIL,bookingData);
-  }catch(e){console.error('Error enviando la reserva por correo:',e)}
-
   if(WHATSAPP_NOTIFY_ENDPOINT){
     fetch(WHATSAPP_NOTIFY_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(bookingData)}).catch(()=>{});
   }
 
-  if(btn){btn.disabled=false;btn.textContent='✦ Confirmar mi Reserva ✦'}
-
-  const msg='✦ Reserva recibida ✦\n\nNombre: '+nombre+'\nFecha: '+fechaHora+'\n\nEn breve recibirás confirmación.\n\nSi no se abrió WhatsApp automáticamente, puedes contactarnos al 📞 8821-5669';
-  closeModal();
-  resetBookingForm();
-  setTimeout(()=>alert(msg),300);
+  // Esto navega la página a FormSubmit y, si todo está activado, vuelve
+  // aquí mismo (?reserva=ok) — ver checkBookingConfirmed() más abajo.
+  sendBookingEmail(BOOKING_NOTIFY_EMAIL,bookingData);
 }
 function resetBookingForm(){
   if($('m-nombre'))$('m-nombre').value='';
@@ -2608,6 +2597,13 @@ function setupReveal(){
   document.querySelectorAll('.rv').forEach(el=>{if(el.getBoundingClientRect().top<innerHeight)el.classList.add('on');else obs.observe(el)});
 }
 setupReveal();
+
+// Al volver de FormSubmit tras una reserva exitosa (ver sendBookingEmail).
+(function checkBookingConfirmed(){
+  if(location.search.indexOf('reserva=ok')===-1)return;
+  history.replaceState(null,'',location.pathname);
+  setTimeout(()=>alert('✦ Reserva recibida ✦\n\nGracias, tu solicitud se envió correctamente. En breve recibirás confirmación.\n\nSi no se abrió WhatsApp automáticamente, puedes contactarnos al 📞 8821-5669'),300);
+})();
 </script>
   <script>
 if ('serviceWorker' in navigator) {
