@@ -246,14 +246,15 @@ section{position:relative;z-index:1;padding:6rem 4rem}
 .deck-picker{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:980px;margin:0 auto 1.8rem}
 .dmc{width:65px;height:96px;cursor:pointer;perspective:600px;position:relative;flex-shrink:0}
 .dmc-inner{width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.23,1,.32,1);position:relative}
-.dmc.sel .dmc-inner{transform:rotateY(180deg)}
-.dmc:hover:not(.sel) .dmc-inner{transform:rotateY(22deg) translateY(-3px)}
+.dmc.revealed .dmc-inner{transform:rotateY(180deg)}
+.dmc:hover:not(.picked):not(.revealed) .dmc-inner{transform:rotateY(22deg) translateY(-3px)}
 .dface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:2px;overflow:hidden}
-.dback{background:linear-gradient(160deg,#1E0840,#0A0520);border:1px solid rgba(201,168,76,.22);display:flex;align-items:center;justify-content:center}
+.dback{background:linear-gradient(160deg,#1E0840,#0A0520);border:1px solid rgba(201,168,76,.22);display:flex;align-items:center;justify-content:center;transition:border-color .25s,box-shadow .25s}
 .dfront{background:#F5EFD8;border:1px solid rgba(201,168,76,.55);transform:rotateY(180deg);display:flex;flex-direction:column;overflow:hidden}
 .dfront img{width:100%;flex:1;object-fit:cover;display:block;min-height:0}
 .dfront-label{background:#1A0A30;padding:2px 3px;text-align:center;font-family:'Cormorant Garamond',serif;font-size:.4rem;color:var(--gold);font-style:italic;flex-shrink:0}
-.dmc.sel::after{content:'✦';position:absolute;top:2px;right:4px;font-size:.45rem;color:var(--gold);z-index:10;pointer-events:none;text-shadow:0 0 6px rgba(201,168,76,.8)}
+.dmc.picked .dback{border-color:rgba(201,168,76,.65);box-shadow:0 0 0 2px rgba(201,168,76,.55),0 0 14px rgba(201,168,76,.45)}
+.dmc.picked:not(.revealed)::after{content:'✦';position:absolute;top:2px;right:4px;font-size:.45rem;color:var(--gold);z-index:10;pointer-events:none;text-shadow:0 0 6px rgba(201,168,76,.8)}
 .deck-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem}
 .shuf-btn{padding:.85rem 2.2rem;background:transparent;border:1px solid var(--bb);color:var(--gold);font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .shuf-btn:hover{background:rgba(201,168,76,.06)}
@@ -261,10 +262,17 @@ section{position:relative;z-index:1;padding:6rem 4rem}
 .tirada-result{display:none;max-width:940px;margin:0 auto}
 .tirada-result.show{display:block}
 .tr-cards{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem}
-.tr-card{width:105px;display:flex;flex-direction:column;align-items:center;gap:.4rem}
-.tr-cv{width:105px;height:160px;overflow:hidden;border:1px solid var(--bb);border-radius:2px;background:#F5EFD8;box-shadow:0 4px 18px rgba(0,0,0,.5)}
-.tr-cv img{width:100%;height:100%;object-fit:cover;display:block}
-.tr-pos{font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gd);text-align:center}
+.tr-hint{font-family:'Cormorant Garamond',serif;font-size:.88rem;font-style:italic;color:var(--ts);margin-bottom:1.6rem}
+.tr-card{width:105px;display:flex;flex-direction:column;align-items:center;gap:.4rem;cursor:pointer}
+.tr-cv{width:105px;height:160px;perspective:700px}
+.tr-cv-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.23,1,.32,1);transform:rotate(var(--rot,0deg))}
+.tr-card.tr-revealed .tr-cv-inner,.tr-card-abs.tr-revealed .tr-cv-inner{transform:rotate(var(--rot,0deg)) rotateY(180deg)}
+.tr-cf{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:2px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.5)}
+.tr-back{background:linear-gradient(160deg,#1E0840,#0A0520);border:1px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center}
+.tr-front{background:#F5EFD8;border:1px solid rgba(201,168,76,.6);transform:rotateY(180deg)}
+.tr-front img{width:100%;height:100%;object-fit:cover;display:block}
+.tr-pos{font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gd);text-align:center;transition:color .3s}
+.tr-card.tr-revealed .tr-pos,.tr-card-abs.tr-revealed .tr-pos{color:var(--gold)}
 .tr-interp{border:1px solid var(--br);background:rgba(201,168,76,.02);padding:1.8rem}
 .tr-interp-title{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gl);margin-bottom:1.3rem;text-align:center}
 .tr-row{display:grid;grid-template-columns:70px 1fr;gap:.9rem;align-items:start;padding-bottom:1rem;margin-bottom:1rem;border-bottom:1px solid var(--br)}
@@ -279,12 +287,12 @@ section{position:relative;z-index:1;padding:6rem 4rem}
 .shuf-reset:hover{border-color:rgba(201,168,76,.4)!important;color:var(--tp)!important}
 /* TIRADAS — layouts espaciales reales (cruz celta, árbol de la vida, rueda, etc.) */
 .tr-canvas{position:relative;margin:0 auto 2.2rem;width:100%;max-width:640px;aspect-ratio:1/var(--tr-ar,1)}
-.tr-card-abs{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:var(--cw,70px);display:flex;flex-direction:column;align-items:center;gap:.35rem;z-index:1}
+.tr-card-abs{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:var(--cw,70px);display:flex;flex-direction:column;align-items:center;gap:.35rem;z-index:1;cursor:pointer}
 .tr-card-abs.tr-rot{z-index:2}
-.tr-card-abs .tr-cv{width:var(--cw,70px);height:calc(var(--cw,70px) * 1.52);overflow:hidden;border:1px solid var(--bb);border-radius:2px;background:#F5EFD8;box-shadow:0 4px 18px rgba(0,0,0,.5);transition:transform .4s}
-.tr-card-abs .tr-cv img{width:100%;height:100%;object-fit:cover;display:block}
-.tr-card-abs .tr-pos{font-size:.44rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gd);text-align:center;line-height:1.3;max-width:calc(var(--cw,70px) * 1.9)}
+.tr-card-abs .tr-cv{width:var(--cw,70px);height:calc(var(--cw,70px) * 1.52);perspective:700px}
+.tr-card-abs .tr-pos{font-size:.44rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gd);text-align:center;line-height:1.3;max-width:calc(var(--cw,70px) * 1.9);transition:color .3s}
 .tr-grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.7rem 2.6rem;max-width:460px;margin:0 auto 2.2rem}
+.tr-interp-empty{font-family:'Cormorant Garamond',serif;font-size:.82rem;font-style:italic;color:var(--tm);text-align:center}
 /* Arcanos grid última fila centrada */
 .arc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:0 .5rem;justify-items:center}
 .arc-grid::after{content:'';flex:auto}
@@ -570,6 +578,7 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
       <button class="shuf-btn shuf-reset" onclick="resetTirada()">↺ Reiniciar</button>
     </div>
     <div class="tirada-result" id="tirada-result">
+      <p class="tr-hint">Hacé clic en cada carta de tu tirada para revelarla, en el orden que prefieras</p>
       <div class="tr-cards" id="tr-cards"></div>
       <div class="tr-interp" id="tr-interp"></div>
       <button class="new-btn" onclick="resetTirada()">✦ Nueva Tirada ✦</button>
@@ -2257,28 +2266,49 @@ function selTirada(k,btn){
   updateRevealBtn();
 }
 function updateInfo(){const t=TIRADAS[tiradaActiva];$('t-info').innerHTML='<em>'+t.desc+'</em> — Selecciona <strong id="t-need">'+t.c+' carta'+(t.c>1?'s':'')+'</strong>'}
+const PALO_INTERP={bastos:'Bastos enciende el fuego de la acción. Actúa desde el coraje genuino.',copas:'Copas llevan el flujo emocional. Honra lo que sientes sin filtrarlo.',espadas:'Espadas aportan claridad mental. Corta lo que no sirve con precisión.',oros:'Oros anclan la energía material. Recursos, cuerpo y manifestación tangible.'};
+function trCardBackFront(c){return '<div class="tr-cv"><div class="tr-cv-inner"><div class="tr-cf tr-back">'+BACK_SVG+'</div><div class="tr-cf tr-front">'+rwsImg(c.id,'width:100%;height:100%;')+'</div></div></div>';}
 function renderTrCards(t){
   const cardsEl=$('tr-cards');
+  let cls;
   if(t.layout==='grid2'){
-    cardsEl.className='tr-grid2';
-    cardsEl.removeAttribute('style');
-    cardsEl.innerHTML=selCards.map((c,i)=>'<div class="tr-card"><div class="tr-cv">'+rwsImg(c.id,'width:100%;height:100%;')+'</div><span class="tr-pos">'+t.pos[i]+'</span></div>').join('');
+    cardsEl.className='tr-grid2';cardsEl.removeAttribute('style');cls='tr-card';
   }else if(Array.isArray(t.layout)){
     cardsEl.className='tr-canvas';
     cardsEl.style.setProperty('--tr-ar',t.ar||1);
     cardsEl.style.setProperty('--cw',(t.cw||70)+'px');
-    cardsEl.innerHTML=selCards.map((c,i)=>{
-      const p=t.layout[i]||{x:50,y:50};
-      const rotStyle=p.rot?(' style="transform:translate(-50%,-50%) rotate('+p.rot+'deg)"'):'';
-      return '<div class="tr-card-abs'+(p.rot?' tr-rot':'')+'" style="left:'+p.x+'%;top:'+p.y+'%">'
-        +'<div class="tr-cv"'+rotStyle+'>'+rwsImg(c.id,'width:100%;height:100%;')+'</div>'
-        +'<span class="tr-pos">'+t.pos[i]+'</span></div>';
-    }).join('');
+    cls='tr-card-abs';
   }else{
-    cardsEl.className='tr-cards';
-    cardsEl.removeAttribute('style');
-    cardsEl.innerHTML=selCards.map((c,i)=>'<div class="tr-card"><div class="tr-cv">'+rwsImg(c.id,'width:100%;height:100%;')+'</div><span class="tr-pos">'+t.pos[i]+'</span></div>').join('');
+    cardsEl.className='tr-cards';cardsEl.removeAttribute('style');cls='tr-card';
   }
+  cardsEl.innerHTML=selCards.map((c,i)=>{
+    const p=Array.isArray(t.layout)?(t.layout[i]||{x:50,y:50}):null;
+    const posStyle=p?('left:'+p.x+'%;top:'+p.y+'%;--rot:'+(p.rot||0)+'deg;'):'';
+    const rotClass=(p&&p.rot)?' tr-rot':'';
+    return '<div class="'+cls+rotClass+'" data-i="'+i+'" style="'+posStyle+'">'
+      +trCardBackFront(c)
+      +'<span class="tr-pos">'+t.pos[i]+'</span></div>';
+  }).join('');
+  cardsEl.querySelectorAll('[data-i]').forEach(el=>{
+    const i=+el.dataset.i;
+    el.onclick=()=>revealTrCard(el,i,t);
+  });
+}
+function appendInterpRow(c,i,t){
+  const interpEl=$('tr-interp');
+  const empty=interpEl.querySelector('.tr-interp-empty');if(empty)empty.remove();
+  const mj=ARCANOS_DATA.find(a=>a.n===c.n);
+  const txt=mj?'En la posición de "'+t.pos[i]+'": '+mj.tirada:c.n+' ('+c.k+') en "'+t.pos[i]+'": '+PALO_INTERP[c.p];
+  const row=document.createElement('div');row.className='tr-row';
+  row.innerHTML=rwsImg(c.id,'width:70px;height:105px;border-radius:2px;box-shadow:0 2px 8px rgba(0,0,0,.5);flex-shrink:0;')+'<div><p class="tr-card-name">'+c.n+'</p><span class="tr-card-pos">'+t.pos[i]+'</span><p class="tr-card-txt">'+txt+'</p></div>';
+  interpEl.appendChild(row);
+}
+function revealTrCard(el,i,t){
+  if(el.classList.contains('tr-revealed'))return;
+  el.classList.add('tr-revealed');
+  const c=selCards[i];
+  $('dmc-'+c.id)?.classList.add('revealed');
+  appendInterpRow(c,i,t);
 }
 function renderDeck(){
   const dp=$('deck-picker');dp.innerHTML='';
@@ -2291,8 +2321,8 @@ function renderDeck(){
 }
 function toggleCard(card,el){
   const max=TIRADAS[tiradaActiva].c,idx=selCards.findIndex(c=>c.id===card.id);
-  if(idx>=0){selCards.splice(idx,1);el.classList.remove('sel')}
-  else{if(selCards.length>=max){const old=selCards.shift();$('dmc-'+old.id)?.classList.remove('sel')}selCards.push(card);el.classList.add('sel')}
+  if(idx>=0){selCards.splice(idx,1);el.classList.remove('picked')}
+  else{if(selCards.length>=max){const old=selCards.shift();$('dmc-'+old.id)?.classList.remove('picked')}selCards.push(card);el.classList.add('picked')}
   updateRevealBtn();
 }
 function updateRevealBtn(){const btn=$('btn-reveal');const ok=selCards.length===TIRADAS[tiradaActiva].c;btn.disabled=!ok}
@@ -2316,11 +2346,10 @@ function resetTirada(){
 function doReveal(){
   const t=TIRADAS[tiradaActiva],res=$('tirada-result');
   renderTrCards(t);
-  const interps={bastos:'Bastos enciende el fuego de la acción. Actúa desde el coraje genuino.',copas:'Copas llevan el flujo emocional. Honra lo que sientes sin filtrarlo.',espadas:'Espadas aportan claridad mental. Corta lo que no sirve con precisión.',oros:'Oros anclan la energía material. Recursos, cuerpo y manifestación tangible.'};
-  $('tr-interp').innerHTML='<p class="tr-interp-title">✦ Lectura · '+t.n+' ✦</p>'+selCards.map((c,i)=>{const mj=ARCANOS_DATA.find(a=>a.n===c.n);const txt=mj?'En la posición de "'+t.pos[i]+'": '+mj.tirada:c.n+' ('+c.k+') en "'+t.pos[i]+'": '+interps[c.p];return'<div class="tr-row">'+rwsImg(c.id,'width:70px;height:105px;border-radius:2px;box-shadow:0 2px 8px rgba(0,0,0,.5);flex-shrink:0;')+'<div><p class="tr-card-name">'+c.n+'</p><span class="tr-card-pos">'+t.pos[i]+'</span><p class="tr-card-txt">'+txt+'</p></div></div>'}).join('');
+  $('tr-interp').innerHTML='<p class="tr-interp-title">✦ Lectura · '+t.n+' ✦</p><p class="tr-interp-empty">Las lecturas van a ir apareciendo aquí a medida que reveles cada carta…</p>';
   res.classList.add('show');setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
-function resetTirada(){selCards=[];document.querySelectorAll('.dmc').forEach(c=>c.classList.remove('sel'));$('tirada-result').classList.remove('show');updateRevealBtn();$('deck-picker').scrollIntoView({behavior:'smooth',block:'center'})}
+function resetTirada(){selCards=[];document.querySelectorAll('.dmc').forEach(c=>c.classList.remove('picked','revealed'));$('tirada-result').classList.remove('show');updateRevealBtn();$('deck-picker').scrollIntoView({behavior:'smooth',block:'center'})}
 renderDeck();updateInfo();
 
 // ═══════════════════════════════════════
