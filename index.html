@@ -277,6 +277,14 @@ section{position:relative;z-index:1;padding:6rem 4rem}
 .new-btn:hover{background:rgba(201,168,76,.06)}
 .shuf-reset{border-color:var(--br)!important;color:var(--ts)!important}
 .shuf-reset:hover{border-color:rgba(201,168,76,.4)!important;color:var(--tp)!important}
+/* TIRADAS — layouts espaciales reales (cruz celta, árbol de la vida, rueda, etc.) */
+.tr-canvas{position:relative;margin:0 auto 2.2rem;width:100%;max-width:640px;aspect-ratio:1/var(--tr-ar,1)}
+.tr-card-abs{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:var(--cw,70px);display:flex;flex-direction:column;align-items:center;gap:.35rem;z-index:1}
+.tr-card-abs.tr-rot{z-index:2}
+.tr-card-abs .tr-cv{width:var(--cw,70px);height:calc(var(--cw,70px) * 1.52);overflow:hidden;border:1px solid var(--bb);border-radius:2px;background:#F5EFD8;box-shadow:0 4px 18px rgba(0,0,0,.5);transition:transform .4s}
+.tr-card-abs .tr-cv img{width:100%;height:100%;object-fit:cover;display:block}
+.tr-card-abs .tr-pos{font-size:.44rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gd);text-align:center;line-height:1.3;max-width:calc(var(--cw,70px) * 1.9)}
+.tr-grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.7rem 2.6rem;max-width:460px;margin:0 auto 2.2rem}
 /* Arcanos grid última fila centrada */
 .arc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:0 .5rem;justify-items:center}
 .arc-grid::after{content:'';flex:auto}
@@ -543,7 +551,14 @@ footer{border-top:1px solid var(--br);padding:3.5rem 4rem;display:flex;align-ite
     <div class="tirada-nav">
       <button class="t-btn on" onclick="selTirada('unica',this)">✦ Carta Única</button>
       <button class="t-btn" onclick="selTirada('tres',this)">◈ Pasado · Presente · Futuro</button>
-      <button class="t-btn" onclick="selTirada('cinco',this)">⬟ Cruz Celta (5)</button>
+      <button class="t-btn" onclick="selTirada('celta',this)">⬟ Cruz Celta (10)</button>
+      <button class="t-btn" onclick="selTirada('relacion',this)">♡ Relación / Pareja (6)</button>
+      <button class="t-btn" onclick="selTirada('arbol',this)">✶ Árbol de la Vida (10)</button>
+      <button class="t-btn" onclick="selTirada('astro',this)">⚹ Tirada Astrológica (12)</button>
+      <button class="t-btn" onclick="selTirada('rueda',this)">☸ Rueda del Año (12)</button>
+      <button class="t-btn" onclick="selTirada('decision',this)">⚖ Tirada de la Decisión (4)</button>
+      <button class="t-btn" onclick="selTirada('vromana',this)">✝ Cruz Románica en V (4)</button>
+      <button class="t-btn" onclick="selTirada('septedias',this)">◐ Tirada de los 7 Días (7)</button>
       <button class="t-btn" onclick="selTirada('siete',this)">⊹ Herradura (7)</button>
       <button class="t-btn" onclick="selTirada('elem',this)">⊕ Los 4 Elementos</button>
     </div>
@@ -2175,11 +2190,55 @@ const DECK=[
   {id:64,n:'As de Oros',g:'🪙',t:'menor',p:'oros',k:'Manifestación'},{id:65,n:'Dos de Oros',g:'🤹',t:'menor',p:'oros',k:'Equilibrio'},{id:66,n:'Tres de Oros',g:'🎨',t:'menor',p:'oros',k:'Maestría'},{id:67,n:'Cuatro de Oros',g:'💰',t:'menor',p:'oros',k:'Posesión'},{id:68,n:'Cinco de Oros',g:'🙇',t:'menor',p:'oros',k:'Necesidad'},{id:69,n:'Seis de Oros',g:'🤲',t:'menor',p:'oros',k:'Generosidad'},{id:70,n:'Siete de Oros',g:'🌱',t:'menor',p:'oros',k:'Paciencia'},{id:71,n:'Ocho de Oros',g:'🔨',t:'menor',p:'oros',k:'Trabajo'},{id:72,n:'Nueve de Oros',g:'🏠',t:'menor',p:'oros',k:'Independencia'},{id:73,n:'Diez de Oros',g:'👨‍👩‍👦',t:'menor',p:'oros',k:'Herencia'},{id:74,n:'Paje de Oros',g:'🧒',t:'menor',p:'oros',k:'Estudio'},{id:75,n:'Caballo de Oros',g:'🏇',t:'menor',p:'oros',k:'Constancia'},{id:76,n:'Reina de Oros',g:'👸',t:'menor',p:'oros',k:'Prosperidad'},{id:77,n:'Rey de Oros',g:'🤴',t:'menor',p:'oros',k:'Éxito'}
 ];
 const TIRADAS={
-  unica:{n:'Carta Única',c:1,pos:['El Mensaje del Día']},
-  tres:{n:'Pasado · Presente · Futuro',c:3,pos:['Pasado','Presente','Futuro']},
-  cinco:{n:'Cruz Celta',c:5,pos:['La Situación','El Obstáculo','El Fundamento','El Camino','El Resultado']},
-  siete:{n:'Herradura',c:7,pos:['Pasado lejano','Pasado reciente','Presente','Ext. externas','Esperanzas','Lo oculto','Resultado']},
-  elem:{n:'Los 4 Elementos',c:4,pos:['🔥 Fuego','🌿 Tierra','🌬️ Aire','🌊 Agua']}
+  unica:{n:'Carta Única',c:1,pos:['El Mensaje del Día'],
+    desc:'La energía más importante que debes enfocar ahora mismo'},
+  tres:{n:'Pasado · Presente · Futuro',c:3,pos:['Pasado','Presente','Futuro'],
+    desc:'La línea del tiempo de tu situación'},
+  celta:{n:'Cruz Celta',c:10,
+    pos:['El Presente','Lo que te Cruza','El Fundamento','El Pasado','La Corona (Meta)','El Futuro Cercano','Tu Actitud','El Entorno','Esperanzas y Miedos','El Resultado Final'],
+    desc:'La lectura más completa: el cruce de fuerzas que definen tu situación',
+    layout:[{x:32,y:50},{x:32,y:50,rot:90},{x:32,y:82},{x:10,y:50},{x:32,y:18},{x:54,y:50},{x:82,y:84},{x:82,y:62},{x:82,y:40},{x:82,y:18}],
+    ar:1.3,cw:62},
+  relacion:{n:'Relación / Pareja',c:6,
+    pos:['Vos','Tu Pareja','Base de la Relación','Lo que Deseás Vos','Lo que Desea la Otra Persona','Futuro del Vínculo'],
+    desc:'Deseos, entorno y futuro de un vínculo afectivo',
+    layout:'grid2'},
+  arbol:{n:'Árbol de la Vida',c:10,
+    pos:['Kéter — Corona','Biná — Entendimiento','Jojmá — Sabiduría','Guevurá — Severidad','Jesed — Misericordia','Tiféret — Equilibrio','Hod — Esplendor','Nétzaj — Victoria','Yesod — Fundamento','Maljut — Reino'],
+    desc:'Las diez sefirot de la Cábala, para explorar tu crecimiento espiritual',
+    layout:[{x:50,y:5},{x:25,y:19},{x:75,y:19},{x:25,y:40},{x:75,y:40},{x:50,y:52},{x:25,y:70},{x:75,y:70},{x:50,y:85},{x:50,y:97}],
+    ar:1.9,cw:56},
+  astro:{n:'Tirada Astrológica',c:12,
+    pos:['Casa I — Identidad','Casa II — Recursos','Casa III — Comunicación','Casa IV — Hogar','Casa V — Creatividad','Casa VI — Trabajo y Salud','Casa VII — Relaciones','Casa VIII — Transformación','Casa IX — Filosofía','Casa X — Vocación','Casa XI — Amistades','Casa XII — Espiritualidad'],
+    desc:'Las doce casas astrológicas, cada una un área de tu vida',
+    layout:[{x:50,y:10},{x:70,y:15},{x:85,y:30},{x:90,y:50},{x:85,y:70},{x:70,y:85},{x:50,y:90},{x:30,y:85},{x:15,y:70},{x:10,y:50},{x:15,y:30},{x:30,y:15}],
+    ar:1,cw:54},
+  rueda:{n:'Rueda del Año',c:12,
+    pos:['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+    desc:'Doce cartas: cada una pronostica la energía de un mes del año que viene',
+    layout:[{x:50,y:10},{x:70,y:15},{x:85,y:30},{x:90,y:50},{x:85,y:70},{x:70,y:85},{x:50,y:90},{x:30,y:85},{x:15,y:70},{x:10,y:50},{x:15,y:30},{x:30,y:15}],
+    ar:1,cw:54},
+  decision:{n:'Tirada de la Decisión',c:4,
+    pos:['Tu Situación Actual','Camino: Opción A','Camino: Opción B','Consejo Final'],
+    desc:'Compará dos caminos posibles y el consejo para decidir',
+    layout:[{x:50,y:10},{x:20,y:55},{x:80,y:55},{x:50,y:92}],
+    ar:.95,cw:84},
+  vromana:{n:'Cruz Románica (en V)',c:4,
+    pos:['Origen del Asunto','Fuerzas que Actúan','Meta o Deseo','Camino hacia la Meta'],
+    desc:'Dos caminos convergentes que trazan una V hacia tu meta',
+    layout:[{x:18,y:12},{x:38,y:55},{x:82,y:12},{x:62,y:55}],
+    ar:.9,cw:78},
+  septedias:{n:'Tirada de los 7 Días',c:7,
+    pos:['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'],
+    desc:'Una carta guía para cada día de tu semana'},
+  siete:{n:'Herradura',c:7,pos:['Pasado lejano','Pasado reciente','Presente','Ext. externas','Esperanzas','Lo oculto','Resultado'],
+    desc:'Visión completa del panorama de tu vida en forma de herradura',
+    layout:[{x:8,y:78},{x:14,y:50},{x:29,y:30},{x:50,y:23},{x:71,y:30},{x:86,y:50},{x:92,y:78}],
+    ar:.95,cw:60},
+  elem:{n:'Los 4 Elementos',c:4,pos:['🔥 Fuego','🌿 Tierra','🌬️ Aire','🌊 Agua'],
+    desc:'Cómo fluye la energía elemental en ti',
+    layout:[{x:50,y:88},{x:50,y:10},{x:86,y:50},{x:14,y:50}],
+    ar:1,cw:82}
 };
 
 function shuffle(arr){return arr.slice().sort(()=>Math.random()-.5)}
@@ -2197,7 +2256,30 @@ function selTirada(k,btn){
   $('tirada-result').classList.remove('show');
   updateRevealBtn();
 }
-function updateInfo(){const t=TIRADAS[tiradaActiva];$('t-info').innerHTML='<em>'+{unica:'La energía más importante ahora',tres:'La línea del tiempo de tu situación',cinco:'Análisis profundo de las fuerzas en juego',siete:'Visión completa del panorama de tu vida',elem:'Cómo fluye la energía elemental en ti'}[tiradaActiva]+'</em> — Selecciona <strong id="t-need">'+t.c+' carta'+(t.c>1?'s':'')+'</strong>'}
+function updateInfo(){const t=TIRADAS[tiradaActiva];$('t-info').innerHTML='<em>'+t.desc+'</em> — Selecciona <strong id="t-need">'+t.c+' carta'+(t.c>1?'s':'')+'</strong>'}
+function renderTrCards(t){
+  const cardsEl=$('tr-cards');
+  if(t.layout==='grid2'){
+    cardsEl.className='tr-grid2';
+    cardsEl.removeAttribute('style');
+    cardsEl.innerHTML=selCards.map((c,i)=>'<div class="tr-card"><div class="tr-cv">'+rwsImg(c.id,'width:100%;height:100%;')+'</div><span class="tr-pos">'+t.pos[i]+'</span></div>').join('');
+  }else if(Array.isArray(t.layout)){
+    cardsEl.className='tr-canvas';
+    cardsEl.style.setProperty('--tr-ar',t.ar||1);
+    cardsEl.style.setProperty('--cw',(t.cw||70)+'px');
+    cardsEl.innerHTML=selCards.map((c,i)=>{
+      const p=t.layout[i]||{x:50,y:50};
+      const rotStyle=p.rot?(' style="transform:translate(-50%,-50%) rotate('+p.rot+'deg)"'):'';
+      return '<div class="tr-card-abs'+(p.rot?' tr-rot':'')+'" style="left:'+p.x+'%;top:'+p.y+'%">'
+        +'<div class="tr-cv"'+rotStyle+'>'+rwsImg(c.id,'width:100%;height:100%;')+'</div>'
+        +'<span class="tr-pos">'+t.pos[i]+'</span></div>';
+    }).join('');
+  }else{
+    cardsEl.className='tr-cards';
+    cardsEl.removeAttribute('style');
+    cardsEl.innerHTML=selCards.map((c,i)=>'<div class="tr-card"><div class="tr-cv">'+rwsImg(c.id,'width:100%;height:100%;')+'</div><span class="tr-pos">'+t.pos[i]+'</span></div>').join('');
+  }
+}
 function renderDeck(){
   const dp=$('deck-picker');dp.innerHTML='';
   mazo.forEach(card=>{
@@ -2233,7 +2315,7 @@ function resetTirada(){
 }
 function doReveal(){
   const t=TIRADAS[tiradaActiva],res=$('tirada-result');
-  $('tr-cards').innerHTML=selCards.map((c,i)=>'<div class="tr-card"><div class="tr-cv">'+rwsImg(c.id,'width:100%;height:100%;')+'</div><span class="tr-pos">'+t.pos[i]+'</span></div>').join('');
+  renderTrCards(t);
   const interps={bastos:'Bastos enciende el fuego de la acción. Actúa desde el coraje genuino.',copas:'Copas llevan el flujo emocional. Honra lo que sientes sin filtrarlo.',espadas:'Espadas aportan claridad mental. Corta lo que no sirve con precisión.',oros:'Oros anclan la energía material. Recursos, cuerpo y manifestación tangible.'};
   $('tr-interp').innerHTML='<p class="tr-interp-title">✦ Lectura · '+t.n+' ✦</p>'+selCards.map((c,i)=>{const mj=ARCANOS_DATA.find(a=>a.n===c.n);const txt=mj?'En la posición de "'+t.pos[i]+'": '+mj.tirada:c.n+' ('+c.k+') en "'+t.pos[i]+'": '+interps[c.p];return'<div class="tr-row">'+rwsImg(c.id,'width:70px;height:105px;border-radius:2px;box-shadow:0 2px 8px rgba(0,0,0,.5);flex-shrink:0;')+'<div><p class="tr-card-name">'+c.n+'</p><span class="tr-card-pos">'+t.pos[i]+'</span><p class="tr-card-txt">'+txt+'</p></div></div>'}).join('');
   res.classList.add('show');setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
